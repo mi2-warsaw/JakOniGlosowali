@@ -1,15 +1,16 @@
 shinyUI(fluidPage(
   
-  # Tytuł
-  titlePanel("Wyszukiwarka słów w wypowiedziach posłów kadencji (...)"),
+  includeCSS("style.css"),
   
+  # Tytuł
+  titlePanel("Wyszukiwarka słów w wypowiedziach posłów sejmu RP VII kadencji (2011-2015)"),
   
   
   # menu
   sidebarLayout(
     sidebarPanel(
       actionButton("go", "Pokaż!"),
-      textInput("slowo", "Wpisz wyszukiwane słowo", "przykład")
+      textInput("slowo", "Wpisz wyszukiwane słowo, jego fragment lub wyrażenie (regexp)", "słowo")
     ),
     
     # Plot, na razie przykładowy

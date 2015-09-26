@@ -125,7 +125,14 @@ getBorders <- function(word, N=100) {
                                pattern = paste0(".{0,",N,"}",word,".{0,",N,"}"))
   len <- sapply(allChunks, length)
   len2 <- rep(seq_along(len),len)
-  data.frame(wybraneWypowiedzi$id_statement[len2], text = unlist(allChunks)[len2])
+  link <- sapply(strsplit(wybraneWypowiedzi$id_statement[len2], split=".", fixed=TRUE),
+         function(x) {
+           paste0("http://www.sejm.gov.pl/Sejm7.nsf/wypowiedz.xsp?posiedzenie=",
+                  x[1],"&dzien=",x[2],"&wyp=",x[3])
+         })
+  data.frame(id = wybraneWypowiedzi$id_statement[len2], 
+             link = link, 
+             text = unlist(allChunks)[len2])
 }
 
 

@@ -9,16 +9,16 @@ shinyUI(fluidPage(
   # menu
   sidebarLayout(
     sidebarPanel(
-      actionButton("go", "Pokaż!"),
-      textInput("slowo", "Wpisz wyszukiwane słowo, jego fragment lub wyrażenie (regexp)", "słowo")
+      textInput("slowo", "Wpisz wyszukiwane słowo, jego fragment lub wyrażenie (regexp)", "słowo"),
+      actionButton("go", "Pokaż!")
     ),
     
     # Plot, na razie przykładowy
     mainPanel(
       tabsetPanel(
-        tabPanel('Test ', uiOutput("tekst")),
-        tabPanel('Test Plot1', plotOutput("testPlot1")),
-        tabPanel('Test Plot2', plotOutput("testPlot2"))
+        tabPanel('Wypowiedzi', uiOutput("tekst")),
+        tabPanel('Mówcy', plotOutput("speakerCounts")),
+        tabPanel('Daty', plotOutput("dateCounts"))
       )
     )
   )

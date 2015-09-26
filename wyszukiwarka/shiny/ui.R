@@ -15,6 +15,7 @@ shinyUI(fluidPage(
     # Plot, na razie przykładowy
     mainPanel(
       tabsetPanel(
+        tabPanel('Test ', uiOutput("tekst")),
         tabPanel('Test Plot1', plotOutput("testPlot1")),
         tabPanel('Test Plot2', plotOutput("testPlot2"))
       )

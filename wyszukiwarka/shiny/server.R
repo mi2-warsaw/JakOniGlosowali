@@ -13,19 +13,25 @@ shinyServer(function(input, output) {
   output$tekst <- renderUI({
     #cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
     withProgress(message = 'Obliczam,',
-                 detail = 'Może chwilę potrwać...', value = 0, {
+                 detail = 'może chwilę potrwać...', value = 0, {
                    getBorders(wartosc())
                  })
   })
   
-  output$testPlot1 <- renderPlot({
+  output$speakerCounts <- renderPlot({
     #cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
-    getSpeakerCounts(wartosc())
+    withProgress(message = 'Obliczam,',
+                 detail = 'może chwilę potrwać...', value = 0, {
+                   getSpeakerCounts(wartosc())
+                 })
   })
   
-  output$testPlot2 <- renderPlot({
+  output$dateCounts <- renderPlot({
     #cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
-    getDateCounts(wartosc())
+    withProgress(message = 'Obliczam,',
+                 detail = 'może chwilę potrwać...', value = 0, {
+                   getDateCounts(wartosc())
+                 })
   })
   
 })

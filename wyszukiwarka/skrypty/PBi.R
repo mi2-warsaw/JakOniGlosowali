@@ -72,3 +72,20 @@ smoleńsk
 lasy państwowe
 
 
+
+getSpeakerCounts <- function(word) {
+  # all_statements jest global
+  positions <- stri_detect_regex(str = all_statements$statement, pattern = word)
+  
+  if (sum(positions)) {
+    speakers <- all_statements$surname_name[positions]
+    
+  }
+  
+  pp <- stri_extract_all_regex(str = all_statements$statement, pattern = "[Ss]mole")
+  table(sapply(pp, function(x) is.na(all(x))))
+  
+}
+
+
+

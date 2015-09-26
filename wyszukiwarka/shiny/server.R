@@ -1,18 +1,24 @@
 library(shiny)
 
+source("tools.R")
+
 shinyServer(function(input, output) {
   
   wartosc <- eventReactive(input$go, {
     input$slowo
   })
   
-  output$testPlot1 <- renderPlot({
+  output$test1 <- renderUI({
     cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
-    plot(1, 1, main=wartosc())
   })
   
-  output$testPlot2 <- renderPlot({
+  output$testPlot1 <- renderPlot({
     cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
-    plot(2, 2, main=wartosc())
+    getSpeakerCounts(wartosc())
+  })
+  
+  output$getDateCounts <- renderPlot({
+    cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
+    getSpeakerCounts(wartosc())
   })
 })

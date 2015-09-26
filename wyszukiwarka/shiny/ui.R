@@ -3,6 +3,8 @@ shinyUI(fluidPage(
   # Tytuł
   titlePanel("Wyszukiwarka słów w wypowiedziach posłów kadencji (...)"),
   
+  
+  
   # menu
   sidebarLayout(
     sidebarPanel(
@@ -12,7 +14,10 @@ shinyUI(fluidPage(
     
     # Plot, na razie przykładowy
     mainPanel(
-      plotOutput("distPlot")
+      tabsetPanel(
+        tabPanel('Test Plot1', plotOutput("testPlot1")),
+        tabPanel('Test Plot2', plotOutput("testPlot2"))
+      )
     )
   )
 ))

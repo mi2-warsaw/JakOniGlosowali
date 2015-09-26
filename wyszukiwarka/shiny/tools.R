@@ -61,8 +61,9 @@ getBorders <- function(word, N=100) {
                    paste0("http://www.sejm.gov.pl/Sejm7.nsf/wypowiedz.xsp?posiedzenie=",
                           x[1],"&dzien=",x[2],"&wyp=",x[3])
                  })
-  data.frame(id = wybraneWypowiedzi$id_statement[len2], 
+  df <- data.frame(id = wybraneWypowiedzi$id_statement[len2], 
              link = link, 
              text = unlist(allChunks)[len2])
+  HTML(df$text)
 }
 

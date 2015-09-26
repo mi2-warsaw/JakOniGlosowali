@@ -8,7 +8,7 @@ shinyServer(function(input, output) {
     input$slowo
   })
   
-  output$test1 <- renderUI({
+  output$tekst <- renderUI({
     cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
     getBorders(wartosc())
   })

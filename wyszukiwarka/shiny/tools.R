@@ -56,7 +56,10 @@ getBorders <- function(word, N=100) {
   
   allChunks <- sapply(1:nrow(wybraneWypowiedzi), function(i) {
     tmp <- stri_locate_all_regex(str = wybraneWypowiedzi$statement[i], pattern = word)[[1]]
-    paste(sapply(1:nrow(tmp), function(j) {
+    dat1 <- all_statements$surname_name[positions[i]]
+    dat2 <- all_statements$date_statement[positions[i]]
+
+    tmpD <- paste(sapply(1:nrow(tmp), function(j) {
       
       id <- all_statements$id_statement[positions[i]]
       x <- strsplit(id, split=".", fixed = TRUE)[[1]]
@@ -64,8 +67,8 @@ getBorders <- function(word, N=100) {
       adres <- paste0("http://www.sejm.gov.pl/Sejm7.nsf/wypowiedz.xsp?posiedzenie=",
              x[1],"&dzien=",x[2],"&wyp=",x[3])
 
-      paste0(
-        "<a href='",adres,"'>",
+      tmp <- paste0(
+        "<a href='",adres,"'>... ",
         substr(wybraneWypowiedzi$statement[i], 
              max(tmp[j,1] - N, 1),
              tmp[j,1]-1),
@@ -77,8 +80,12 @@ getBorders <- function(word, N=100) {
       substr(wybraneWypowiedzi$statement[i], 
              tmp[j,2]+1,
              min(tmp[j,2] + N, nchar(wybraneWypowiedzi$statement[i]))),
-      "</a><br/>")
+      "... </a><br/>")
+      
+      paste(tmp)
     }), collapse="</br>")
+    
+    paste(dat2, "<i>", dat1, "</i><br/><br/>", tmpD)
   })
   
   HTML(paste(allChunks, collapse = "<hr>"))

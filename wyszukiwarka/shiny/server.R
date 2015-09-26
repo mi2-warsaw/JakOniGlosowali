@@ -17,8 +17,8 @@ shinyServer(function(input, output) {
     getSpeakerCounts(wartosc())
   })
   
-  output$getDateCounts <- renderPlot({
+  output$testPlot2 <- renderPlot({
     cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
-    getSpeakerCounts(wartosc())
+    getDateCounts(wartosc())
   })
 })

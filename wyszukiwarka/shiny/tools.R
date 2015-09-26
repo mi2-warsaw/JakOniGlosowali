@@ -80,12 +80,12 @@ getBorders <- function(word, N=100) {
       substr(wybraneWypowiedzi$statement[i], 
              tmp[j,2]+1,
              min(tmp[j,2] + N, nchar(wybraneWypowiedzi$statement[i]))),
-      "... </a><br/>")
+      "... </a></small><br/>")
       
       paste(tmp)
     }), collapse="</br>")
     
-    paste(dat2, "<i>", dat1, "</i><br/></small>", tmpD)
+    paste(dat2, "<i>", dat1, "</i><br/>", tmpD)
   })
   
   HTML(paste(rev(allChunks), collapse = "<hr>"))

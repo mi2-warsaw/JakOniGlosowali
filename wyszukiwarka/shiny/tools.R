@@ -68,7 +68,7 @@ getBorders <- function(word, N=100) {
              x[1],"&dzien=",x[2],"&wyp=",x[3])
 
       tmp <- paste0(
-        "<a href='",adres,"'>... ",
+        "<small><a href='",adres,"'>... ",
         substr(wybraneWypowiedzi$statement[i], 
              max(tmp[j,1] - N, 1),
              tmp[j,1]-1),
@@ -85,9 +85,9 @@ getBorders <- function(word, N=100) {
       paste(tmp)
     }), collapse="</br>")
     
-    paste(dat2, "<i>", dat1, "</i><br/><br/>", tmpD)
+    paste(dat2, "<i>", dat1, "</i><br/></small>", tmpD)
   })
   
-  HTML(paste(allChunks, collapse = "<hr>"))
+  HTML(paste(rev(allChunks), collapse = "<hr>"))
 }
 

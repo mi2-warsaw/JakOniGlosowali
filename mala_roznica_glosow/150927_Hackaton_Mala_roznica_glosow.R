@@ -40,7 +40,7 @@ all_votes %>%
 
 votes <- merge(votes, idiki, by.x=c("nr_meeting", "nr_voting"), by.y=c("nr_meeting", "nr_voting"))
 
-#glosowania dla legislacji ogolem
+#glosowania dla legislacji wedlug partii
 votes %>%  
   group_by(title, id_voting, club, vote) %>% 
   summarise(liczba=n()) %>%
@@ -49,7 +49,7 @@ votes %>%
   mutate(roznica = abs(Za - Przeciw)) %>%
   arrange(title, id_voting, club) -> glosowania_partie
 
-#glosowania dla legislacji wedlug partii
+#glosowania dla legislacji ogolem
 votes %>% 
   group_by(title, id_voting, vote) %>% 
   summarise(liczba=n()) %>%

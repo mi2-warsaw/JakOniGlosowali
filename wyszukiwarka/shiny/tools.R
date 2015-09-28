@@ -5,13 +5,23 @@ library(lubridate)
 load("all_statements.rda")
 all_statements$statement <- as.character(all_statements$statement)
 
-getSpeakerCounts <- function(word, N = 20) {
+getSpeakerCounts <- function(words, N = 20) {
   # all_statements jest global
+  word <- words[1]
+  word2 <- words[2]
+  word <- words[1]
+  word2 <- words[2]
   positions <- stri_detect_regex(str = all_statements$statement, pattern = word)
+  if (nchar(word2)>1) {
+    positionsNeg <- stri_detect_regex(str = all_statements$statement, pattern = word2)
+    positions <- which(positions & !positionsNeg)
+  } else {
+    positions <- which(positions)
+  }
   
   pl <- qplot(1,1) + theme_bw()
   
-  if (sum(positions)) {
+  if (length(positions)>1) {
     speakers <- all_statements$surname_name[positions]
     speakers <- head(sort(table(speakers), decreasing = TRUE), N)
     df <- data.frame(name = names(speakers), counts = as.numeric(speakers))
@@ -28,13 +38,23 @@ getSpeakerCounts <- function(word, N = 20) {
 
 library(lubridate)
 
-getDateCounts <- function(word) {
+getDateCounts <- function(words) {
+  word <- words[1]
+  word2 <- words[2]
   # all_statements jest global
+  word <- words[1]
+  word2 <- words[2]
   positions <- stri_detect_regex(str = all_statements$statement, pattern = word)
+  if (nchar(word2)>1) {
+    positionsNeg <- stri_detect_regex(str = all_statements$statement, pattern = word2)
+    positions <- which(positions & !positionsNeg)
+  } else {
+    positions <- which(positions)
+  }
   
   pl <- qplot(1,1) + theme_bw()
   
-  if (sum(positions)) {
+  if (length(positions)>1) {
     dates <- all_statements$date_statement[positions]
     dates <- table(dates)
     df <- data.frame(name = ymd(names(dates)), counts = as.numeric(dates))
@@ -49,9 +69,16 @@ getDateCounts <- function(word) {
 }
 
 
-getBorders <- function(word, N=100) {
+getBorders <- function(words, N=100) {
+  word <- words[1]
+  word2 <- words[2]
   positions <- stri_detect_regex(str = all_statements$statement, pattern = word)
-  positions <- head(which(positions), 500)
+  if (nchar(word2)>1) {
+    positionsNeg <- stri_detect_regex(str = all_statements$statement, pattern = word2)
+    positions <- head(which(positions & !positionsNeg), 500)
+  } else {
+    positions <- head(which(positions), 500)
+  }
   wybraneWypowiedzi <- all_statements[positions, ]
   
   allChunks <- sapply(1:nrow(wybraneWypowiedzi), function(i) {

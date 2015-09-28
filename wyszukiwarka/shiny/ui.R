@@ -10,6 +10,7 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(
       textInput("slowo", "Wpisz wyszukiwane słowo, jego fragment lub wyrażenie (regexp)", "słowo"),
+      textInput("slowoNeg", "Nie uwzględniaj wypowiedzi zawierajacych to wyrażenie (regexp)", ""),
       actionButton("go", "Pokaż!")
     ),
     

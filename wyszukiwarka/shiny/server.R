@@ -5,7 +5,7 @@ source("tools.R")
 shinyServer(function(input, output) {
   
   wartosc <- eventReactive(input$go, {
-    c(input$slowo, input$slowoNeg)
+    c(input$slowo, input$slowoNeg, input$posel)
   })
   
   # pokazuje progress przy obliczeniach

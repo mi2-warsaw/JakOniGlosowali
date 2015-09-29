@@ -88,7 +88,8 @@ getDateCounts <- function(words) {
       geom_bar(stat="identity") +
       geom_smooth(se=FALSE, span=0.2, color="red3", size=2) + 
       ggtitle(paste("Pattern:", word, "\n\n")) + 
-      theme_bw() + xlab("") + ylab("")
+      theme_bw() + xlab("") + ylab("") + 
+      coord_cartesian(ylim=c(0,max(df$counts)))
   }
   pl
 }

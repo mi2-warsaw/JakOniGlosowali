@@ -172,7 +172,7 @@ shinyUI(fluidPage(
         tabPanel('Mówcy', plotOutput("speakerCounts")),
         tabPanel('Daty', plotOutput("dateCounts")),
         tabPanel('Autorzy', {
-          HTML("<br><br> Przemysłam Biecek i Marta Czarnocka-Cieciura, 2015 <br><br>
+          HTML("<br><br> Przemysław Biecek i Marta Czarnocka-Cieciura, 2015 <br><br>
                Kod źródłowy: <a href=\"https://github.com/mi2-warsaw/JakOniGlosowali\">https://github.com/mi2-warsaw/JakOniGlosowali")
           })
       )

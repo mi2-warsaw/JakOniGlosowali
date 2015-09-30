@@ -159,7 +159,7 @@ shinyUI(fluidPage(
   # menu
   sidebarLayout(
     sidebarPanel(
-      textInput("slowo", "Wpisz wyszukiwane słowo, jego fragment lub wyrażenie (regexp)", "słowo"),
+      textInput("slowo", "Wpisz wyszukiwane słowo, jego fragment lub wyrażenie (regexp)", ""),
       textInput("slowoNeg", "Nie uwzględniaj wypowiedzi zawierajacych to wyrażenie (regexp)", ""),
       selectInput("posel", "Ogranicz wyniki do wypowiedzi", posel, "", multiple = TRUE),
       actionButton("go", "Pokaż!")
@@ -170,7 +170,11 @@ shinyUI(fluidPage(
       tabsetPanel(
         tabPanel('Wypowiedzi', uiOutput("tekst")),
         tabPanel('Mówcy', plotOutput("speakerCounts")),
-        tabPanel('Daty', plotOutput("dateCounts"))
+        tabPanel('Daty', plotOutput("dateCounts")),
+        tabPanel('Autorzy', {
+          HTML("<br><br> Przemysłam Biecek i Marta Czarnocka-Cieciura, 2015 <br><br>
+               Kod źródłowy: <a href=\"https://github.com/mi2-warsaw/JakOniGlosowali\">https://github.com/mi2-warsaw/JakOniGlosowali")
+          })
       )
     )
   )

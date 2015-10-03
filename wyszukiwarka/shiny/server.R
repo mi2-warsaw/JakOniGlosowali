@@ -14,7 +14,7 @@ shinyServer(function(input, output) {
     #cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
     withProgress(message = 'Obliczam,',
                  detail = 'może chwilę potrwać...', value = 0, {
-                   getBorders(wartosc())
+                   getBorders(wartosc(), sortuj=input$sortuj)
                  })
   })
   
@@ -22,7 +22,7 @@ shinyServer(function(input, output) {
     #cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
     withProgress(message = 'Obliczam,',
                  detail = 'może chwilę potrwać...', value = 0, {
-                   getSpeakerCounts(wartosc())
+                   getSpeakerCounts(wartosc(), sortuj=input$sortuj)
                  })
   })
 
@@ -31,7 +31,7 @@ shinyServer(function(input, output) {
     #cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
     withProgress(message = 'Obliczam,',
                  detail = 'może chwilę potrwać...', value = 0, {
-                   getSpeakerCounts2(wartosc())
+                   getSpeakerCounts2(wartosc(), sortuj=input$sortuj)
                  })
   })
   
@@ -39,7 +39,7 @@ shinyServer(function(input, output) {
     #cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
     withProgress(message = 'Obliczam,',
                  detail = 'może chwilę potrwać...', value = 0, {
-                   getDateCounts(wartosc())
+                   getDateCounts(wartosc(), sortuj=input$sortuj)
                  })
   })
   
@@ -47,7 +47,7 @@ shinyServer(function(input, output) {
     #cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
     withProgress(message = 'Obliczam,',
                  detail = 'może chwilę potrwać...', value = 0, {
-                   getDateCounts2(wartosc())
+                   getDateCounts2(wartosc(), sortuj=input$sortuj)
                  })
   })
   

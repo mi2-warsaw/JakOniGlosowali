@@ -20,7 +20,7 @@ all_statements$surname_name2 <- gsub(as.character(all_statements$surname_name2),
 all_statements$surname_name2 <- gsub(as.character(all_statements$surname_name2),
                                      pattern="Sprawozdawca ", replacement="")
 
-getSpeakerCounts <- function(words, N = 20) {
+getSpeakerCounts <- function(words, N = 20, sortuj) {
   # all_statements jest global
   word <- words[1]
   word2 <- words[2]
@@ -45,7 +45,7 @@ getSpeakerCounts <- function(words, N = 20) {
   
   if (length(positions)>1) {
     speakers <- all_statementsSelected$surname_name2[positions]
-    speakers <- head(sort(table(speakers), decreasing = TRUE), N)
+    speakers <- head(sort(table(speakers), decreasing = sortuj), N)
     df <- data.frame(name = names(speakers), counts = as.numeric(speakers))
     
     df$name <- reorder(df$name, df$counts, mean)
@@ -58,7 +58,7 @@ getSpeakerCounts <- function(words, N = 20) {
   pl
 }
 
-getSpeakerCounts2 <- function(words, N = 20) {
+getSpeakerCounts2 <- function(words, N = 20, sortuj) {
   # all_statements jest global
   word <- words[1]
   word2 <- words[2]
@@ -82,12 +82,12 @@ getSpeakerCounts2 <- function(words, N = 20) {
   
   tmp <- table(all_statementsSelected$surname_name2)
   df <- data.frame(name = names(tmp), liczba = as.vector(tmp))
-  df[order(df$liczba, decreasing = TRUE),]
+  df[order(df$liczba, decreasing = sortuj),]
 }
 
 library(lubridate)
 
-getDateCounts2 <- function(words) {
+getDateCounts2 <- function(words, sortuj) {
   # all_statements jest global
   word <- words[1]
   word2 <- words[2]
@@ -108,11 +108,11 @@ getDateCounts2 <- function(words) {
   
   tmp <- table(all_statementsSelected$date_statement)
   df <- data.frame(data = names(tmp), liczba = as.vector(tmp))
-  df[order(df$liczba, decreasing = TRUE),]
+  df[order(df$liczba, decreasing = sortuj),]
 }
 
 
-getDateCounts <- function(words) {
+getDateCounts <- function(words, sortuj) {
   word <- words[1]
   word2 <- words[2]
   # all_statements jest global
@@ -150,7 +150,7 @@ getDateCounts <- function(words) {
 }
 
 
-getBorders <- function(words, N=100) {
+getBorders <- function(words, N=100, sortuj) {
   word <- words[1]
   word2 <- words[2]
   all_statementsSelected <- all_statements
@@ -167,7 +167,7 @@ getBorders <- function(words, N=100) {
     positions <- which(positions)
   }
   wybraneWypowiedzi <- all_statementsSelected[positions, ]
-  wybraneWypowiedzi <- wybraneWypowiedzi[order(as.character(wybraneWypowiedzi$date_statement), decreasing = TRUE),]
+  wybraneWypowiedzi <- wybraneWypowiedzi[order(as.character(wybraneWypowiedzi$date_statement), decreasing = sortuj),]
     
   w1 <- nrow(wybraneWypowiedzi)
   w2 <- length(unique(wybraneWypowiedzi$surname_name))

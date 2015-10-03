@@ -147,6 +147,7 @@ posel <- c("Adam Abramowicz", "Adam Hofman", "Adam Kępiński", "Adam Kwiatkowsk
   "Zbigniew Włodkowski", "Zbyszek Zaborowski", "Zenon Durka", 
   "Zofia Czernow", "Zofia Ławrynowicz", "Zofia Popiołek")
 
+load("all_statements.rda")
 
 shinyUI(fluidPage(
   
@@ -159,18 +160,21 @@ shinyUI(fluidPage(
   # menu
   sidebarLayout(
     sidebarPanel(
-      textInput("slowo", "Wpisz wyszukiwane słowo, jego fragment lub wyrażenie (regexp)", ""),
+      textInput("slowo", "Wpisz wyszukiwane słowo, jego fragment lub wyrażenie (regexp)", "[Jj]anosikowe"),
       textInput("slowoNeg", "Nie uwzględniaj wypowiedzi zawierajacych to wyrażenie (regexp)", ""),
       selectInput("posel", "Ogranicz wyniki do wypowiedzi", posel, "", multiple = TRUE),
-      actionButton("go", "Pokaż!")
+      checkboxInput("sortuj", "Sortuj malejąco", TRUE),
+      actionButton("go", "Pokaż!"),
+      hr(),
+      p("Ostatnie posiedzenie w bazie:", max(all_statements$date_statement))
     ),
     
     # Plot, na razie przykładowy
     mainPanel(
       tabsetPanel(
         tabPanel('Wypowiedzi', uiOutput("tekst")),
-        tabPanel('Mówcy', plotOutput("speakerCounts")),
-        tabPanel('Daty', plotOutput("dateCounts")),
+        tabPanel('Mówcy', plotOutput("speakerCounts"), tableOutput("speakerCounts2")),
+        tabPanel('Daty', plotOutput("dateCounts"), tableOutput("dateCounts2")),
         tabPanel('Autorzy', {
           HTML("<br><br> Przemysław Biecek i Marta Czarnocka-Cieciura, 2015 <br><br>
                Kod źródłowy: <a href=\"https://github.com/mi2-warsaw/JakOniGlosowali\">https://github.com/mi2-warsaw/JakOniGlosowali")

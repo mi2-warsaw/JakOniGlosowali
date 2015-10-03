@@ -58,7 +58,59 @@ getSpeakerCounts <- function(words, N = 20) {
   pl
 }
 
+getSpeakerCounts2 <- function(words, N = 20) {
+  # all_statements jest global
+  word <- words[1]
+  word2 <- words[2]
+  word <- words[1]
+  word2 <- words[2]
+  all_statementsSelected <- all_statements
+  poslowie <- words[-(1:2)]
+  if (length(poslowie)>0) {
+    cat(poslowie)
+    all_statementsSelected <- all_statementsSelected[all_statementsSelected$surname_name2 %in% poslowie,]
+  }
+  
+  positions <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word)
+  if (nchar(word2)>1) {
+    positionsNeg <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word2)
+    positions <- which(positions & !positionsNeg)
+  } else {
+    positions <- which(positions)
+  }
+  all_statementsSelected <- all_statementsSelected[positions,]
+  
+  tmp <- table(all_statementsSelected$surname_name2)
+  df <- data.frame(name = names(tmp), liczba = as.vector(tmp))
+  df[order(df$liczba, decreasing = TRUE),]
+}
+
 library(lubridate)
+
+getDateCounts2 <- function(words) {
+  # all_statements jest global
+  word <- words[1]
+  word2 <- words[2]
+  all_statementsSelected <- all_statements
+  poslowie <- words[-(1:2)]
+  if (length(poslowie)>0) {
+    all_statementsSelected <- all_statementsSelected[all_statementsSelected$surname_name2 %in% poslowie,]
+  }
+  
+  positions <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word)
+  if (nchar(word2)>1) {
+    positionsNeg <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word2)
+    positions <- which(positions & !positionsNeg)
+  } else {
+    positions <- which(positions)
+  }
+  all_statementsSelected <- all_statementsSelected[positions,]
+  
+  tmp <- table(all_statementsSelected$date_statement)
+  df <- data.frame(data = names(tmp), liczba = as.vector(tmp))
+  df[order(df$liczba, decreasing = TRUE),]
+}
+
 
 getDateCounts <- function(words) {
   word <- words[1]
@@ -89,7 +141,7 @@ getDateCounts <- function(words) {
     
     pl <- ggplot(df, aes(x=name, y=counts)) +
       geom_bar(stat="identity") +
-      geom_smooth(se=FALSE, span=0.2, color="red3", size=2) + 
+#      geom_smooth(se=FALSE, span=0.2, color="red3", size=2) + 
       ggtitle(paste("Pattern:", word, "\n\n")) + 
       theme_bw() + xlab("") + ylab("") + 
       coord_cartesian(ylim=c(0,max(df$counts)))
@@ -110,20 +162,24 @@ getBorders <- function(words, N=100) {
   positions <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word)
   if (nchar(word2)>1) {
     positionsNeg <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word2)
-    positions <- head(which(positions & !positionsNeg), 500)
+    positions <- which(positions & !positionsNeg)
   } else {
-    positions <- head(which(positions), 500)
+    positions <- which(positions)
   }
   wybraneWypowiedzi <- all_statementsSelected[positions, ]
+  wybraneWypowiedzi <- wybraneWypowiedzi[order(as.character(wybraneWypowiedzi$date_statement), decreasing = TRUE),]
+    
+  w1 <- nrow(wybraneWypowiedzi)
+  w2 <- length(unique(wybraneWypowiedzi$surname_name))
   
   allChunks <- sapply(1:nrow(wybraneWypowiedzi), function(i) {
     tmp <- stri_locate_all_regex(str = wybraneWypowiedzi$statement[i], pattern = word)[[1]]
-    dat1 <- all_statementsSelected$surname_name[positions[i]]
-    dat2 <- all_statementsSelected$date_statement[positions[i]]
+    dat1 <- wybraneWypowiedzi$surname_name[i]
+    dat2 <- wybraneWypowiedzi$date_statement[i]
 
     tmpD <- paste(sapply(1:nrow(tmp), function(j) {
       
-      id <- all_statementsSelected$id_statement[positions[i]]
+      id <- wybraneWypowiedzi$id_statement[i]
       x <- strsplit(id, split=".", fixed = TRUE)[[1]]
       
       adres <- paste0("http://www.sejm.gov.pl/Sejm7.nsf/wypowiedz.xsp?posiedzenie=",
@@ -150,6 +206,6 @@ getBorders <- function(words, N=100) {
     paste(dat2, "<i>", dat1, "</i><br/>", tmpD)
   })
   
-  HTML(paste(rev(allChunks), collapse = "<hr>"))
+  HTML(paste("Liczba wszystkich wystąpień: ", w1, "<br/>Liczba osób wypowiadających się: ", w2), "<br/><br/>",paste(allChunks, collapse = "<hr>"))
 }
 

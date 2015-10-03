@@ -2,6 +2,9 @@ library(ggplot2)
 library(stringi)
 library(lubridate)
 
+# all_statements <- get_statements_table()
+# save(all_statements, file="all_statements.rda")
+
 load("all_statements.rda")
 all_statements$statement <- as.character(all_statements$statement)
 all_statements$surname_name2 <- gsub(as.character(all_statements$surname_name),

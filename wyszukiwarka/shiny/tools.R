@@ -186,7 +186,7 @@ getBorders <- function(words, N=100, sortuj) {
              x[1],"&dzien=",x[2],"&wyp=",x[3])
 
       tmp <- paste0(
-        "<small><a href='",adres,"'>... ",
+        "<small><a href='",adres,"' target='_blank'>... ",
         substr(wybraneWypowiedzi$statement[i], 
              max(tmp[j,1] - N, 1),
              tmp[j,1]-1),

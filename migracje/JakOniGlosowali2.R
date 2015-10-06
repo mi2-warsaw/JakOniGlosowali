@@ -3,7 +3,7 @@ library(ggplot2)
 
 #dane do wizualizacji - wszyscy poza PO i PiS
 df <- all_votes %>%
-  filter(club != "PO" & club != "PiS") %>%
+#  filter(club != "PO" & club != "PiS") %>%
   group_by(nr_meeting, club, surname_name) %>%
   summarize(ile = n()) %>%
   arrange(nr_meeting, club, surname_name)
@@ -23,7 +23,7 @@ ggplot(df, aes(x = nr_meeting, y = surname_name, fill = club)) +
 
 #wykres słupkowy
 df2 <- df
-vec <- c("SLD","PSL","RP","TR","BiG","niez.","ZP","ID","KPSP","SP","BC")
+vec <- c("SLD","PSL","RP","TR","BiG","niez.","ZP","ID","KPSP","SP","BC","PO","PiS")
 df2$club <- factor(df$club, 
                    levels=vec)
 df3 <- do.call(rbind, lapply(vec, function(l) df2[df2$club==l,]))

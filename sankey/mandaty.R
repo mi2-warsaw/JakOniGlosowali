@@ -7,6 +7,8 @@ load("/Users/pbiecek/GitHub/JakOniGlosowali/all_votes.rda")
 #wybieramy kluczowe głosowania
 kluczowe <- c("1","2474","3773","3980","4865","6029")
 
+kluczowe <- c("45", "974", "2474","3773","3980","4865","6029")
+
 #wybieramy kluby do pokazania
 #kluby <- c("PSL", "SLD", "TR", "BiG", "KPSP", "SP", "ID",  "ZP", "RP", "BC", "niez.", "PSL", "SLD")
 #wykluczone kluby: "PiS", "PO", 
@@ -56,13 +58,21 @@ fixtable <- function(...) {
   tab
 }
 
-#matryca przepływów między posiedzeniami
 flow <- rbind(
-  data.frame(fixtable(z = paste0(liczby_spr$"1",  " (1)"), do = paste0(liczby_spr$"2474", " (2474)"))),
+  data.frame(fixtable(z = paste0(liczby_spr$"45",  " (45)"), do = paste0(liczby_spr$"974", " (974)"))),
+  data.frame(fixtable(z = paste0(liczby_spr$"974",  " (974)"), do = paste0(liczby_spr$"2474", " (2474)"))),
   data.frame(fixtable(z = paste0(liczby_spr$"2474", " (2474)"), do = paste0(liczby_spr$"3773", " (3773)"))),
   data.frame(fixtable(z = paste0(liczby_spr$"3773", " (3773)"), do = paste0(liczby_spr$"3980", " (3980)"))),
   data.frame(fixtable(z = paste0(liczby_spr$"3980", " (3980)"), do = paste0(liczby_spr$"4865", " (4865)"))),
   data.frame(fixtable(z = paste0(liczby_spr$"4865", " (4865)"), do = paste0(liczby_spr$"6029", " (6029)"))))
+
+# #matryca przepływów między posiedzeniami
+# flow <- rbind(
+#   data.frame(fixtable(z = paste0(liczby_spr$"1",  " (1)"), do = paste0(liczby_spr$"2474", " (2474)"))),
+#   data.frame(fixtable(z = paste0(liczby_spr$"2474", " (2474)"), do = paste0(liczby_spr$"3773", " (3773)"))),
+#   data.frame(fixtable(z = paste0(liczby_spr$"3773", " (3773)"), do = paste0(liczby_spr$"3980", " (3980)"))),
+#   data.frame(fixtable(z = paste0(liczby_spr$"3980", " (3980)"), do = paste0(liczby_spr$"4865", " (4865)"))),
+#   data.frame(fixtable(z = paste0(liczby_spr$"4865", " (4865)"), do = paste0(liczby_spr$"6029", " (6029)"))))
 
 #wykluczenie wartości zerowych z matrycy
 flow <- flow[flow[,3] > 0,]

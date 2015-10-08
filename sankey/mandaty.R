@@ -84,8 +84,13 @@ links <- data.frame(source = nam[as.character(flow[,1])],
 
 
 #diagram 
-sankeyNetwork(Links = links, Nodes = nodes,
+diag <- sankeyNetwork(Links = links, Nodes = nodes,
               Source = "source", Target = "target",
               Value = "value", NodeID = "name",
               fontFamily = "Arial", fontSize = 12, nodeWidth = 40,
               colourScale = "d3.scale.category20c()")
+
+diag
+
+htmlwidgets::saveWidget(diag, "sankey.html")
+

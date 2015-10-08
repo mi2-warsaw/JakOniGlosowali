@@ -2,6 +2,8 @@ library(dplyr)
 library(tidyr)
 library(networkD3)
 
+load("/Users/pbiecek/GitHub/JakOniGlosowali/all_votes.rda")
+
 #wybieramy kluczowe głosowania
 kluczowe <- c("1","2474","3773","3980","4865","6029")
 
@@ -12,7 +14,6 @@ kluczowe <- c("1","2474","3773","3980","4865","6029")
 #dane do wizualizacji
 liczby <- all_votes %>%
   filter(id_voting %in% kluczowe) %>%
-  #filter(club %in% kluby) %>%
   select(surname_name, id_voting, club) %>%
   group_by(surname_name, id_voting, club) %>%
   summarise(ilu = n()) %>%
@@ -63,12 +64,13 @@ flow <- rbind(
   data.frame(fixtable(z = paste0(liczby_spr$"3980", " (3980)"), do = paste0(liczby_spr$"4865", " (4865)"))),
   data.frame(fixtable(z = paste0(liczby_spr$"4865", " (4865)"), do = paste0(liczby_spr$"6029", " (6029)"))))
 
-# flow <- flow %>%
-#  filter(!grepl("N.O.", z)) %>%
-#   filter(!grepl("N.O.", do))
-
 #wykluczenie wartości zerowych z matrycy
 flow <- flow[flow[,3] > 0,]
+
+
+# just in case
+
+flow <- archivist::aread("pbiecek/graphGallery/c2c1b49f59d016ba57b529bfc4930d87")
 
 #lista węzłów
 nodes <- data.frame(name=unique(c(levels(factor(flow[,1])), levels(factor(flow[,2])))))
@@ -79,6 +81,7 @@ names(nam) <- nodes[,1]
 links <- data.frame(source = nam[as.character(flow[,1])],
                     target = nam[as.character(flow[,2])],
                     value = flow[,3])
+
 
 #diagram 
 sankeyNetwork(Links = links, Nodes = nodes,

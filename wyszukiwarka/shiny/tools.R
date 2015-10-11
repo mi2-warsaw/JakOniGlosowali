@@ -34,7 +34,7 @@ getSpeakerCounts <- function(words, N = 20, sortuj) {
   }
   
   positions <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word)
-  if (nchar(word2)>1) {
+  if (stri_length(stri_enc_toutf8(word2))>1) {
     positionsNeg <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word2)
     positions <- which(positions & !positionsNeg)
   } else {
@@ -72,7 +72,7 @@ getSpeakerCounts2 <- function(words, N = 20, sortuj) {
   }
   
   positions <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word)
-  if (nchar(word2)>1) {
+  if (stri_length(stri_enc_toutf8(word2))>1) {
     positionsNeg <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word2)
     positions <- which(positions & !positionsNeg)
   } else {
@@ -98,7 +98,7 @@ getDateCounts2 <- function(words, sortuj) {
   }
   
   positions <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word)
-  if (nchar(word2)>1) {
+  if (stri_length(stri_enc_toutf8(word2))>1) {
     positionsNeg <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word2)
     positions <- which(positions & !positionsNeg)
   } else {
@@ -125,7 +125,7 @@ getDateCounts <- function(words, sortuj) {
   }
   
   positions <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word)
-  if (nchar(word2)>1) {
+  if (stri_length(stri_enc_toutf8(word2))>1) {
     positionsNeg <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word2)
     positions <- which(positions & !positionsNeg)
   } else {
@@ -160,7 +160,7 @@ getBorders <- function(words, N=100, sortuj) {
   }
   
   positions <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word)
-  if (nchar(word2)>1) {
+  if (stri_length(stri_enc_toutf8(word2))>1) {
     positionsNeg <- stri_detect_regex(str = all_statementsSelected$statement, pattern = word2)
     positions <- which(positions & !positionsNeg)
   } else {
@@ -189,17 +189,17 @@ getBorders <- function(words, N=100, sortuj) {
 
       tmp <- paste0(
         "<small><a href='",adres,"' target='_blank'>... ",
-        substr(wybraneWypowiedzi$statement[i], 
+        stri_sub(wybraneWypowiedzi$statement[i], 
              max(tmp[j,1] - N, 1),
              tmp[j,1]-1),
       "<b>",
-      substr(wybraneWypowiedzi$statement[i], 
+      stri_sub(wybraneWypowiedzi$statement[i], 
              tmp[j,1],
              tmp[j,2]),
       "</b>",
-      substr(wybraneWypowiedzi$statement[i], 
+      stri_sub(wybraneWypowiedzi$statement[i], 
              tmp[j,2]+1,
-             min(tmp[j,2] + N, nchar(wybraneWypowiedzi$statement[i]))),
+             min(tmp[j,2] + N, stri_length(stri_enc_toutf8(wybraneWypowiedzi$statement[i])))),
       "... </a></small><br/>")
       
       paste(tmp)

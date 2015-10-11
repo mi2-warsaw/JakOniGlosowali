@@ -207,7 +207,8 @@ getBorders <- function(words, N=100, sortuj) {
     
     paste(dat2, "<i><b>", dat1, "</b></i><br/><small> <i>[",wybraneWypowiedzi$titles_order_points[i],"]</i></small> <br/>", tmpD)
   })
-  
-  HTML(paste("Liczba wszystkich wystąpień: ", w1, "<br/>Liczba osób wypowiadających się: ", w2), "<br/><br/>",paste(allChunks, collapse = "<hr>"))
+
+  HTML(stri_paste("Liczba wszystkich wystąpień: ", w1, "<br/>Liczba osób wypowiadających się: ", w2, sep=" "), 
+       "<br/><br/>",stri_paste(allChunks, collapse = "<hr>"))
 }
 

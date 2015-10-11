@@ -177,8 +177,11 @@ shinyUI(fluidPage(
         tabPanel('Daty', plotOutput("dateCounts"), tableOutput("dateCounts2")),
         tabPanel('Autorzy', {
           HTML("<br><br> Przemysław Biecek i Marta Czarnocka-Cieciura, 2015 <br><br>
-               Kod źródłowy: <a href=\"https://github.com/mi2-warsaw/JakOniGlosowali\">https://github.com/mi2-warsaw/JakOniGlosowali")
-          })
+               Kod źródłowy: <a href=\"https://github.com/mi2-warsaw/JakOniGlosowali\">https://github.com/mi2-warsaw/JakOniGlosowali</a><br><br>
+               Aplikacja wykonana w ramach hackatonu <a href='http://www.meetup.com/Spotkania-Entuzjastow-R-Warsaw-R-Users-Group-Meetup/events/225061731/'>Jak oni głosowali</a> organizowanego przez fundację <a href='http://smarterpoland.pl'>SmarterPoland</a>. <br>
+               Współpraca i konsultacje merytoryczne: <a href='http://mamprawowiedziec.pl/'>Mam Prawo Wiedzieć</a><br><br>
+               .")
+        })
       )
     )
   )

@@ -150,18 +150,24 @@ posel <- c("Adam Abramowicz", "Adam Hofman", "Adam Kępiński", "Adam Kwiatkowsk
 load("all_statements.rda")
 
 shinyUI(fluidPage(
+  tags$head(tags$script("(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+                        ga('create', 'UA-5650686-6', 'auto');
+                        ga('send', 'pageview');")),
   
   includeCSS("style.css"),
   
   # Tytuł
-  titlePanel("Wyszukiwarka słów w wypowiedziach posłów sejmu RP VII kadencji (2011-2015)"),
+  titlePanel("Wyszukiwarka fraz w wypowiedziach posłów sejmu RP VII kadencji (2011-2015)"),
   
   
   # menu
   sidebarLayout(
     sidebarPanel(
-      textInput("slowo", "Wpisz wyszukiwane słowo, jego fragment lub wyrażenie (regexp)", "[Jj]anosikowe"),
-      textInput("slowoNeg", "Nie uwzględniaj wypowiedzi zawierajacych to wyrażenie (regexp)", ""),
+      textInput("slowo", "Wyszukaj wypowiedzi zawierajace wyrażenie (regexp)", "edukacja"),
+      textInput("slowoNeg", "Nie uwzględniaj wypowiedzi zawierajacych wyrażenie (regexp)", ""),
       selectInput("posel", "Ogranicz wyniki do wypowiedzi", posel, "", multiple = TRUE),
       checkboxInput("sortuj", "Sortuj malejąco", TRUE),
       actionButton("go", "Pokaż!"),
@@ -172,16 +178,33 @@ shinyUI(fluidPage(
     # Plot, na razie przykładowy
     mainPanel(
       tabsetPanel(
-        tabPanel('Wypowiedzi', uiOutput("tekst")),
-        tabPanel('Mówcy', plotOutput("speakerCounts"), tableOutput("speakerCounts2")),
-        tabPanel('Daty', plotOutput("dateCounts"), tableOutput("dateCounts2")),
-        tabPanel('Autorzy', {
-          HTML("<br><br> Przemysław Biecek i Marta Czarnocka-Cieciura, 2015 <br><br>
+        tabPanel('Wstęp', {
+          HTML("Aplikacja pozwala na przeszukiwanie sejmowych wypowiedzi posłów VII kadencji (na bazie danych z portalu <a href='http://sejm.gov.pl'>sejm.gov.pl</a>).<br>
+<br>
+      Wpisz szukane słowa lub frazy w menu po lewej stronie i naciśniej przycisk <b>Pokaż</b>. Przełącz zakładkę aby zobaczyć wyniki.<br>
+               Lewy panel pozwala na określenie parametrów dla wyszukiwania, kolejne zakładki służą do prezentowania wyników lub statystyk wyników.<br>
+<br>               
+               Frazy, które są wykorzystywane do wyszukiwania opisane są za pomocą wyrażeń regularnych. <br> 
+               &nbsp;&nbsp;&nbsp;Wyrażenie <i>' zdrowie'</i> spowoduje wyszukanie wypowiedzi w których słowo zdrowie występuje po spacji (a więc słowo pozdrowienia nie pasuje). <br>
+               &nbsp;&nbsp;&nbsp;Wyrażenie <i>'[Jj]anosikowe'</i> spowoduje wyszukanie wypowiedzi w których słowo janosikowe rozpoczyna się dużą lub małą literą.<br>
+               &nbsp;&nbsp;&nbsp;Wyrażenie <i>'nauka|edukacja|badania'</i> spowoduje wyszukanie wypowiedzi, w których występuje słowo nauka LUB słowo edukacja LUB słowo badania. <br>
+               Można wskazywać fragmenty słów lub bardziej złożone wyrażenia regularne. Więcej informacji jak budować wyrażenia regularne znaleźć można na stronie <a href='http://home.agh.edu.pl/~mkuta/tk/re/re.html'>home.agh.edu.pl/~mkuta/tk/re/re.html</a><br>
+<br>               
+               W kolejnych zakładkach przedstawione są:<br>
+               -	Wypowiedzi - lista wypowiedzi pasujących do wskazanych wzorców.<br>
+               -	Mówcy – statystyka, którzy autorzy częściej / rzadziej wypowiadali określoną frazę,<br>
+               -	Daty – informacja w których posiedzeniach ta fraza pojawiała się częściej/rzadziej.<br>
+<br><br>
+               Aplikacje wykonali: Przemysław Biecek i Marta Czarnocka-Cieciura, 2015 <br>
                Kod źródłowy: <a href=\"https://github.com/mi2-warsaw/JakOniGlosowali\">https://github.com/mi2-warsaw/JakOniGlosowali</a><br><br>
                Aplikacja wykonana w ramach hackatonu <a href='http://www.meetup.com/Spotkania-Entuzjastow-R-Warsaw-R-Users-Group-Meetup/events/225061731/'>Jak oni głosowali</a> organizowanego przez fundację <a href='http://smarterpoland.pl'>SmarterPoland</a>. <br>
                Współpraca i konsultacje merytoryczne: <a href='http://mamprawowiedziec.pl/'>Mam Prawo Wiedzieć</a><br><br>
-               .")
-        })
+               <br><br><a href='http://mamprawowiedziec.pl/'><img width='200px' src='https://github.com/mi2-warsaw/JakOniGlosowali/raw/master/wyszukiwarka/shiny/logo-MPW-CMYK-pion.jpg'/></a>&nbsp;&nbsp;
+               <a href='http://smarterpoland.pl'><img width='140px' src='https://github.com/mi2-warsaw/JakOniGlosowali/raw/master/wyszukiwarka/shiny/smarterpoland.png'/></a>.")
+        }),
+        tabPanel('Wypowiedzi', uiOutput("tekst")),
+        tabPanel('Mówcy', plotOutput("speakerCounts"), tableOutput("speakerCounts2")),
+        tabPanel('Daty', plotOutput("dateCounts"), tableOutput("dateCounts2"))
       )
     )
   )

@@ -168,9 +168,11 @@ getBorders <- function(words, N=100, sortuj) {
   }
   wybraneWypowiedzi <- all_statementsSelected[positions, ]
   wybraneWypowiedzi <- wybraneWypowiedzi[order(as.character(wybraneWypowiedzi$date_statement), decreasing = sortuj),]
-    
+
   w1 <- nrow(wybraneWypowiedzi)
   w2 <- length(unique(wybraneWypowiedzi$surname_name))
+
+  wybraneWypowiedzi <- head(wybraneWypowiedzi, 500)
   
   allChunks <- sapply(1:nrow(wybraneWypowiedzi), function(i) {
     tmp <- stri_locate_all_regex(str = wybraneWypowiedzi$statement[i], pattern = word)[[1]]

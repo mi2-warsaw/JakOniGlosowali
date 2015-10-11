@@ -74,8 +74,14 @@ flow <- rbind(
 #   data.frame(fixtable(z = paste0(liczby_spr$"3980", " (3980)"), do = paste0(liczby_spr$"4865", " (4865)"))),
 #   data.frame(fixtable(z = paste0(liczby_spr$"4865", " (4865)"), do = paste0(liczby_spr$"6029", " (6029)"))))
 
+# jednorazowy fix
+flow[26,3] <- flow[26,3] - 1
+flow[28,3] <- flow[28,3] + 1
+
 #wykluczenie wartości zerowych z matrycy
 flow <- flow[flow[,3] > 0,]
+
+save(flow, file="flow.rda")
 
 
 # just in case

@@ -14,8 +14,7 @@ shinyServer(function(input, output) {
     #cat(wartosc(), file = stderr()) # diagnostyka: wypisywanie wartosci w konsoli
     withProgress(message = 'Obliczam,',
                  detail = 'może chwilę potrwać...', value = 0, {
-                   txt  <- getBorders(wartosc(), sortuj=input$sortuj)
-                   stri_enc_toutf8(txt)
+                   getBorders(wartosc(), sortuj=input$sortuj)
                  })
   })
   

@@ -12,7 +12,7 @@ kol2 <- c(PO = "orange3", PiS = "blue4", RP = "gold3", PSL="green4", SLD="red3",
 scores <- c(`Nieobecny` = 0, `Przeciw` = -2, `Wstrzymał się` = -1, `Za` = 2)
 
 
-load("/Users/pbiecek/GitHub/JakOniGlosowali/all_votes.rda")
+load("all_votes.rda")
 
 
 wzor <- "o ochronie zwierząt"

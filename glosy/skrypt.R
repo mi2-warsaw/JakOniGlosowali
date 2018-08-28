@@ -114,24 +114,30 @@ distMat <- matrix(NA, length(selPos),  length(selPos))
 colnames(distMat) <- paste0(selPos, " (", clubs, ")")
 rownames(distMat) <- paste0(selPos, " (", clubs, ")")
 
-system.time({
-  for (i in 1:(length(selPos)-1)) {
-    cat("\n",i," ", selPos[i]," ")
-    for (j in i:length(selPos)) {
-      selVotesI <- selVotes %>%
-        filter(surname_name %in% selPos[i])
-      selVotesJ <- selVotes %>%
-        filter(surname_name %in% selPos[j])
-      
-      selIJ <- merge(selVotesI[,c(1,2,3,4)], selVotesJ[,c(1,2,3,4)], by="id_voting")
-      
-      distMat[i,j] = mean(selIJ$vote.x == selIJ$vote.y)
-      distMat[j,i] = mean(selIJ$vote.x == selIJ$vote.y)
-      cat(".")
+recalculateDistMat <- TRUE
+if (recalculateDistMat) {
+  system.time({
+    for (i in 1:(length(selPos)-1)) {
+      cat("\n",i," ", selPos[i]," ")
+      for (j in i:length(selPos)) {
+        selVotesI <- selVotes %>%
+          filter(surname_name %in% selPos[i])
+        selVotesJ <- selVotes %>%
+          filter(surname_name %in% selPos[j])
+        
+        selIJ <- merge(selVotesI[,c(1,2,3,4)], selVotesJ[,c(1,2,3,4)], by="id_voting")
+        
+        distMat[i,j] = mean(selIJ$vote.x == selIJ$vote.y)
+        distMat[j,i] = mean(selIJ$vote.x == selIJ$vote.y)
+        cat(".")
+      }
     }
-  }
-  
-})
+    
+  })
+  save(distMat, file = "distMat.rda")
+} else {
+  load(file = "distMat.rda")
+}
 
 rem <- which(rowMeans(is.na(distMat)) > 0.01)
 distMatR <- distMat[-rem, -rem]

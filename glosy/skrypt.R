@@ -4,6 +4,9 @@ library(ape)
 library(RColorBrewer)
 library(dplyr)
 library(tidyr)
+library(parallel)
+
+numCores <- detectCores() # get the number of cores available
 
 kol <- brewer.pal(9,"Set1")
 kol2 <- c(PO = "orange3", PiS = "blue4", RP = "gold3", PSL="green4", SLD="red3", SP="blue1",
@@ -123,14 +126,25 @@ rownames(distMat) <- paste0(selPos, " (", clubs, ")")
 recalculateDistMat <- TRUE
 if (recalculateDistMat) {
   system.time({
-    for (i in 1:(length(selPos)-1)) {
+    
+    iMax <- (length(selPos)-1)
+    jMax <- length(selPos)
+
+    message("Pre-calculating lists of personal votes")
+    results_selVotes <- mclapply(1:jMax,
+                                 FUN=function(i) {
+                                   selVotesI <- selVotes %>%
+                                     filter(surname_name %in% selPos[i])
+                                 },
+                                 mc.cores = numCores)
+    
+    message("Summarizing intersections between member votes")
+    for (i in 1:iMax) {
       cat("\n",i," ", selPos[i]," ")
-      for (j in i:length(selPos)) {
-        selVotesI <- selVotes %>%
-          filter(surname_name %in% selPos[i])
-        selVotesJ <- selVotes %>%
-          filter(surname_name %in% selPos[j])
-        
+      for (j in i:jMax) {
+        selVotesI <- results_selVotes[[i]]
+        selVotesJ <- results_selVotes[[j]]
+
         selIJ <- merge(selVotesI[,c(1,2,3,4)], selVotesJ[,c(1,2,3,4)], by="id_voting")
         
         distMat[i,j] = mean(selIJ$vote.x == selIJ$vote.y)

@@ -10,17 +10,21 @@ kol2 <- c(PO = "orange3", PiS = "blue4", RP = "gold3", PSL="green4", SLD="red3",
           `niez.` = "grey", ID="gold4", TR="gold3", KPSP="blue2", BiG="orange2",
           ZP="blue2", BC ="blue2" )
 scores <- c(`Nieobecny` = 0, `Przeciw` = -2, `Wstrzymał się` = -1, `Za` = 2)
+# Nieobecny = Absent, Przeciw = Against, Wstrzymał się = Abstained, Za = For
 
 
 load("all_votes.rda")
 
 
-wzor <- "o ochronie zwierząt"
-wzor <- "szkolnict"
+# wzor = pattern
+wzor <- "o ochronie zwierząt" # about animal protection
+wzor <- "szkolnict" # school
 wzor <- ""
+
 
 head(grep(unique(all_votes$topic_voting), pattern = "szkolnict", value = TRUE))
 
+# tutuly glos = voting topics
 tytulyGlos <- grep(unique(all_votes$topic_voting), pattern = wzor, value = TRUE)
 
 selVotes <- all_votes %>%
@@ -43,7 +47,7 @@ tVotes <- spread(selVotes[,c(1,3,4)], key = id_voting, value = vote)
 rownames(tVotes) <- paste(tVotes[,1], " - ", clubs[as.character(tVotes[,1])], sep="")
 tVotes <- tVotes[,-1]
 
-# tylko Ci w sejmie na ponad 90% glosowan
+# tylko Ci w sejmie na ponad 90% glosowan = only those in the Seym over 90% of the votes
 cVotes <- clubs2[rowMeans(is.na(tVotes)) < 0.1]
 tVotes <- tVotes[rowMeans(is.na(tVotes)) < 0.1,]
 
@@ -82,7 +86,9 @@ plot(as.phylo(hc), type = "cladogram", cex = 0.4,
      rotate.tree=-85)
 
 
-# nazwy ustaw
+# nazwy ustaw = names of laws
+# ustawy = bill
+# zmianie ustawy = change of the bill
 ustawy <- grep(unique(all_votes$topic_voting), pattern = "ustawy o", value=TRUE)
 ustawy2 <- sapply(ustawy, function(x) {
   paste(strsplit(x, split= "ustawy o")[[1]][-1], collapse= "ustawy o")

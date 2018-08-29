@@ -23,8 +23,10 @@ votingTopicsThatMatchesPattern <- grep(unique(all_votes$topic_voting), pattern =
 selectionOfVotes <- all_votes %>%
   filter(topic_voting %in% votingTopicsThatMatchesPattern)
 
-partiesAndTheirVotes <- table(selectionOfVotes$party,selectionOfVotes$vote)[,c(4,1,3,2)]
-mosaicplot(partiesAndTheirVotes, off = c(0,0), border="white", 
+partiesAndTheirVotes <- table(selectionOfVotes$party,selectionOfVotes$vote)[,c("For","Absent","Abstained","Against")]
+tt<-with(selectionOfVotes, partiesAndTheirVotes)
+partiesAndTheirVotes_sortedByMostFrequent <- tt[order(tt[,2], decreasing=T),]
+mosaicplot(partiesAndTheirVotes_sortedByMostFrequent, off = c(0,0), border="white", 
            color=c("green3", "grey", "red4", "red2"), las=2,
            main="")
 

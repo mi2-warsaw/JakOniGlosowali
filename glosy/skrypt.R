@@ -1,3 +1,12 @@
+if (!require(cluster)) install.packages("cluster", dependencies = TRUE);
+if (!require(ggdendro)) install.packages("ggdendro", dependencies = TRUE);
+if (!require(ape)) install.packages("ape", dependencies = TRUE);
+if (!require(RColorBrewer)) install.packages("RColorBrewer", dependencies = TRUE);
+if (!require(dplyr)) install.packages("dplyr", dependencies = TRUE);
+if (!require(tidyr)) install.packages("tidyr", dependencies = TRUE);
+if (!require(parallel)) install.packages("parallel", dependencies = TRUE);
+if (!require(dendextend)) install.packages("dendextend", dependencies = TRUE);
+
 library(cluster)
 library(ggdendro)
 library(ape)
@@ -18,6 +27,7 @@ countrySpecificPath <- function(path) {
 defaultWidth <- 2000
 defaultHeight <- 2000
 defaultPointSize <- 40
+pdf.options(encoding='ISOLatin2.enc')
 
 numCores <- detectCores() # get the number of cores available
 
@@ -50,6 +60,7 @@ voterIdsAndTheirMostFrequentParty <- apply(voterIdsVsPartiesOccurances, 1, funct
 voterIdsVsVoterNameOccurances <- table(selectionOfVotes$voter_id, selectionOfVotes$voter_name)
 voterIdsAndTheirVoterName <- apply(voterIdsVsVoterNameOccurances, 1, function(x) paste(colnames(voterIdsVsVoterNameOccurances)[x>0], collapse=","))
 
+# replace the vote column with their numeric scores
 selectionOfVotes$vote <- scores[as.character(selectionOfVotes$vote)]
 
 votersAndTheirVotes_ <- spread(selectionOfVotes[,c("voter_id","vote","id_voting")], key = id_voting, value = vote)
@@ -69,7 +80,7 @@ ag <- agnes(dVotes, method = "average")
 hc = as.hclust(ag)
 labels(hc) <- paste(consistentVotersAndTheirVoterName[order.hclust(hc)], " - ", voterIdsAndAllTheirParties[voteFilter][order.hclust(hc)], sep="")
 
-par(mar=c(1,1,2,1), xpd=NA)
+par(xpd=NA)
 png(countrySpecificPath("plot5_fan.png"),
     width=defaultWidth,
     height=defaultHeight,
@@ -185,11 +196,13 @@ distMatR <- distMat[-rem, -rem]
 rownames(distMatR) <- uniqueVoterIds[-rem]
 colnames(distMatR) <- paste(uniqueVoterIds[-rem], voterIdsAndTheirMostFrequentParty[-rem])
 
+if (!require(MASS)) install.packages("MASS", dependencies = TRUE);
 library(MASS)
 
 space <- isoMDS(as.dist(1.001-distMatR), k=2)
 df <- data.frame(space$points, parties=voterIdsAndTheirMostFrequentParty[-rem], name=uniqueVoterIds[-rem])
 
+if (!require(ggplot2)) install.packages("ggplot2", dependencies = TRUE);
 library(ggplot2)
 
 # a plot not mentioned in the original article
@@ -203,21 +216,11 @@ ggplot(df, aes(X1, X2, color=parties, label=name)) +
   theme_bw() + scale_shape_manual(values=LETTERS)
 dev.off()
 
-# debug
-# distMatR["Napieralski Grzegorz",]
-
-
-library(cluster)
-
-ag <- agnes(as.dist(1.001-t(distMatR)), method = "average")
-
-library(ggdendro)
-library(ape)
-library(RColorBrewer)
+ag2 <- agnes(as.dist(1.001-t(distMatR)), method = "average")
 
 colors <- brewer.pal(9,"Set1")
 
-hc = as.hclust(ag)
+hc2 = as.hclust(ag2)
 
 par(mar=c(0,0,2,0))
 
@@ -227,7 +230,7 @@ png(countrySpecificPath("plotC_phylo.png"),
     height=defaultHeight,
     pointsize=defaultPointSize,
 )
-plot(as.phylo(hc), type = "fan", cex = 0.4,
+plot(as.phylo(hc2), type = "fan", cex = 0.4,
      tip.color = colors[as.numeric(factor(voterIdsAndTheirMostFrequentParty[-rem]))],
      main=pattern)
 dev.off()

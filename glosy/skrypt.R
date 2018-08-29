@@ -26,9 +26,15 @@ partiesAndTheirVotes <- table(selectionOfVotes$party,selectionOfVotes$vote)[,c("
 tt<-with(selectionOfVotes, partiesAndTheirVotes)
 partiesAndTheirVotes_sortedByMostFrequent <- tt[order(tt[,2], decreasing=T),]
 
+png("plotA_mosaicplot.png",
+    width=defaultWidth,
+    height=defaultHeight,
+    pointsize=defaultPointSize,
+)
 mosaicplot(partiesAndTheirVotes_sortedByMostFrequent, off = c(0,0), border="white", 
            color=c("green3", "grey", "red4", "red2"), las=2,
            main="")
+dev.off()
 
 membersVsPartiesOccurances <- table(selectionOfVotes$voter_id, selectionOfVotes$party)
 membersAndAllTheirParties <- apply(membersVsPartiesOccurances, 1, function(x) paste(colnames(membersVsPartiesOccurances)[x>0], collapse=","))
@@ -176,9 +182,16 @@ df <- data.frame(space$points, parties=membersAndTheirMostFrequentParty[-rem], n
 
 library(ggplot2)
 
+# a plot not mentioned in the original article
+png("plotB_aes.png",
+    width=as.integer(defaultWidth/3),
+    height=as.integer(defaultHeight/3),
+    pointsize=defaultPointSize,
+)
 ggplot(df, aes(X1, X2, color=parties, label=name)) +
   geom_text(size=4) +
   theme_bw() + scale_shape_manual(values=LETTERS)
+dev.off()
 
 # debug
 # distMatR["Napieralski Grzegorz",]
@@ -198,7 +211,14 @@ hc = as.hclust(ag)
 
 par(mar=c(0,0,2,0))
 
+# another plot not mentioned in the original article
+png("plotC_phylo.png",
+    width=defaultWidth,
+    height=defaultHeight,
+    pointsize=defaultPointSize,
+)
 plot(as.phylo(hc), type = "fan", cex = 0.4,
      tip.color = colors[as.numeric(factor(membersAndTheirMostFrequentParty[-rem]))],
      main=pattern)
+dev.off()
 

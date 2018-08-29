@@ -152,8 +152,8 @@ dev.off()
 uniqueVoterIds <- levels(factor(selectionOfVotes$voter_id))
 
 distMat <- matrix(NA, length(uniqueVoterIds),  length(uniqueVoterIds))
-colnames(distMat) <- paste0(uniqueVoterIds, " (", voterIdsAndAllTheirParties, ")")
-rownames(distMat) <- paste0(uniqueVoterIds, " (", voterIdsAndAllTheirParties, ")")
+colnames(distMat) <- uniqueVoterIds
+rownames(distMat) <- uniqueVoterIds
 
 recalculateDistMat <- TRUE
 if (recalculateDistMat) {
@@ -194,13 +194,13 @@ if (recalculateDistMat) {
 rem <- which(rowMeans(is.na(distMat)) > 0.01)
 distMatR <- distMat[-rem, -rem]
 rownames(distMatR) <- uniqueVoterIds[-rem]
-colnames(distMatR) <- paste(uniqueVoterIds[-rem], voterIdsAndTheirMostFrequentParty[-rem])
+colnames(distMatR) <- uniqueVoterIds[-rem]
 
 if (!require(MASS)) install.packages("MASS", dependencies = TRUE);
 library(MASS)
 
 space <- isoMDS(as.dist(1.001-distMatR), k=2)
-df <- data.frame(space$points, parties=voterIdsAndTheirMostFrequentParty[-rem], name=uniqueVoterIds[-rem])
+df <- data.frame(space$points, parties=voterIdsAndTheirMostFrequentParty[-rem], voterIds=uniqueVoterIds[-rem], voterNames=voterIdsAndTheirVoterName[-rem])
 
 if (!require(ggplot2)) install.packages("ggplot2", dependencies = TRUE);
 library(ggplot2)
@@ -211,7 +211,7 @@ png(countrySpecificPath("plotB_aes.png"),
     height=as.integer(defaultHeight/3),
     pointsize=defaultPointSize,
 )
-ggplot(df, aes(X1, X2, color=parties, label=name)) +
+ggplot(df, aes(X1, X2, color=parties, label=voterNames)) +
   geom_text(size=4) +
   theme_bw() + scale_shape_manual(values=LETTERS)
 dev.off()
@@ -221,6 +221,7 @@ ag2 <- agnes(as.dist(1.001-t(distMatR)), method = "average")
 colors <- brewer.pal(9,"Set1")
 
 hc2 = as.hclust(ag2)
+labels(hc2) <- paste(df$voterNames[order.hclust(hc2)], " - ", df$parties[voteFilter][order.hclust(hc2)], sep="")
 
 par(mar=c(0,0,2,0))
 

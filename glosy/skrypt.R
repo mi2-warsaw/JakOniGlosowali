@@ -10,7 +10,6 @@ library(parallel)
 defaultWidth <- 2000
 defaultHeight <- 2000
 defaultPointSize <- 40
-dev.off() # reset output device
 
 numCores <- detectCores() # get the number of cores available
 

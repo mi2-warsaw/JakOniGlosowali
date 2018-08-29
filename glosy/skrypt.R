@@ -5,6 +5,7 @@ library(RColorBrewer)
 library(dplyr)
 library(tidyr)
 library(parallel)
+library(dendextend)
 
 # country to work with
 country <- "pl"
@@ -46,20 +47,27 @@ voterIdsVsPartiesOccurances <- table(selectionOfVotes$voter_id, selectionOfVotes
 voterIdsAndAllTheirParties <- apply(voterIdsVsPartiesOccurances, 1, function(x) paste(colnames(voterIdsVsPartiesOccurances)[x>0], collapse=","))
 voterIdsAndTheirMostFrequentParty <- apply(voterIdsVsPartiesOccurances, 1, function(x) paste(colnames(voterIdsVsPartiesOccurances)[which.max(x)], collapse=","))
 
+voterIdsVsVoterNameOccurances <- table(selectionOfVotes$voter_id, selectionOfVotes$voter_name)
+voterIdsAndTheirVoterName <- apply(voterIdsVsVoterNameOccurances, 1, function(x) paste(colnames(voterIdsVsVoterNameOccurances)[x>0], collapse=","))
+
 selectionOfVotes$vote <- scores[as.character(selectionOfVotes$vote)]
 
-tVotes_ <- spread(selectionOfVotes[,c(1,3,4)], key = id_voting, value = vote)
-rownames(tVotes_) <- paste(tVotes_[,1], " - ", voterIdsAndAllTheirParties[as.character(tVotes_[,1])], sep="")
-tVotes <- tVotes_[,-1]
+votersAndTheirVotes_ <- spread(selectionOfVotes[,c("voter_id","vote","id_voting")], key = id_voting, value = vote)
+voterIds <- votersAndTheirVotes_[,1]
+rownames(votersAndTheirVotes_) <- voterIds
 
-# tylko Ci w sejmie na ponad 90% glosowan = Only those in the Diet on more than 90% of voting
-cVotes <- voterIdsAndTheirMostFrequentParty[rowMeans(is.na(tVotes)) < 0.1]
-tVotes <- tVotes[rowMeans(is.na(tVotes)) < 0.1,]
+votersAndTheirVotes <- votersAndTheirVotes_[,-1] # removes the voter_id column, leaving only the votes (columns) of each voter (rows)
 
-dVotes <- dist(tVotes)
+# only include parliament members that have voted on at least 90% of the votings
+voteFilter <- rowMeans(is.na(votersAndTheirVotes)) < 0.1
+partyRepresentedByEachVote <- voterIdsAndTheirMostFrequentParty[voteFilter]
+consistentVotersAndTheirVotes <- votersAndTheirVotes[voteFilter,]
+consistentVotersAndTheirVoterName <- voterIdsAndTheirVoterName[voteFilter]
+dVotes <- dist(consistentVotersAndTheirVotes)
 
 ag <- agnes(dVotes, method = "average")
 hc = as.hclust(ag)
+labels(hc) <- paste(consistentVotersAndTheirVoterName[order.hclust(hc)], " - ", voterIdsAndAllTheirParties[voteFilter][order.hclust(hc)], sep="")
 
 par(mar=c(1,1,2,1), xpd=NA)
 png(countrySpecificPath("plot5_fan.png"),
@@ -68,7 +76,7 @@ png(countrySpecificPath("plot5_fan.png"),
     pointsize=defaultPointSize,
 )
 plot(as.phylo(hc), type = "fan", cex = 0.4,
-     tip.color = partyColors[cVotes],
+     tip.color = partyColors[partyRepresentedByEachVote],
      edge.width = 2,
      no.margin = TRUE,
      main=pattern,
@@ -82,7 +90,7 @@ png(countrySpecificPath("plot4_unrooted.png"),
     pointsize=defaultPointSize,
 )
 plot(as.phylo(hc), type = "unrooted", cex = 0.4,
-     tip.color = partyColors[cVotes],
+     tip.color = partyColors[partyRepresentedByEachVote],
      no.margin = TRUE,
      main=pattern,
      rotate.tree=-85)
@@ -95,7 +103,7 @@ png(countrySpecificPath("plot5alt_radial.png"),
     pointsize=defaultPointSize,
 )
 plot(as.phylo(hc), type = "radial", cex = 0.4,
-     tip.color = partyColors[cVotes],
+     tip.color = partyColors[partyRepresentedByEachVote],
      edge.width = 2,
      no.margin = TRUE,
      main=pattern,
@@ -109,7 +117,7 @@ png(countrySpecificPath("plot3_phylogram.png"),
     pointsize=15,
 )
 plot(as.phylo(hc), type = "phylogram", cex = 2.5,
-     tip.color = partyColors[cVotes],
+     tip.color = partyColors[partyRepresentedByEachVote],
      edge.width = 2,
      no.margin = TRUE,
      main=pattern)
@@ -122,7 +130,7 @@ png(countrySpecificPath("plot3alt_cladogram.png"),
     pointsize=15,
 )
 plot(as.phylo(hc), type = "cladogram", cex = 2.5,
-     tip.color = partyColors[cVotes],
+     tip.color = partyColors[partyRepresentedByEachVote],
      edge.width = 2,
      no.margin = TRUE,
      main=pattern)

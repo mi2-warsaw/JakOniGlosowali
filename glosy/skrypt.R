@@ -42,18 +42,18 @@ mosaicplot(partiesAndTheirVotes_sortedByMostFrequent, off = c(0,0), border="whit
            main="")
 dev.off()
 
-membersVsPartiesOccurances <- table(selectionOfVotes$voter_id, selectionOfVotes$party)
-membersAndAllTheirParties <- apply(membersVsPartiesOccurances, 1, function(x) paste(colnames(membersVsPartiesOccurances)[x>0], collapse=","))
-membersAndTheirMostFrequentParty <- apply(membersVsPartiesOccurances, 1, function(x) paste(colnames(membersVsPartiesOccurances)[which.max(x)], collapse=","))
+voterIdsVsPartiesOccurances <- table(selectionOfVotes$voter_id, selectionOfVotes$party)
+voterIdsAndAllTheirParties <- apply(voterIdsVsPartiesOccurances, 1, function(x) paste(colnames(voterIdsVsPartiesOccurances)[x>0], collapse=","))
+voterIdsAndTheirMostFrequentParty <- apply(voterIdsVsPartiesOccurances, 1, function(x) paste(colnames(voterIdsVsPartiesOccurances)[which.max(x)], collapse=","))
 
 selectionOfVotes$vote <- scores[as.character(selectionOfVotes$vote)]
 
 tVotes_ <- spread(selectionOfVotes[,c(1,3,4)], key = id_voting, value = vote)
-rownames(tVotes_) <- paste(tVotes_[,1], " - ", membersAndAllTheirParties[as.character(tVotes_[,1])], sep="")
+rownames(tVotes_) <- paste(tVotes_[,1], " - ", voterIdsAndAllTheirParties[as.character(tVotes_[,1])], sep="")
 tVotes <- tVotes_[,-1]
 
 # tylko Ci w sejmie na ponad 90% glosowan = Only those in the Diet on more than 90% of voting
-cVotes <- membersAndTheirMostFrequentParty[rowMeans(is.na(tVotes)) < 0.1]
+cVotes <- voterIdsAndTheirMostFrequentParty[rowMeans(is.na(tVotes)) < 0.1]
 tVotes <- tVotes[rowMeans(is.na(tVotes)) < 0.1,]
 
 dVotes <- dist(tVotes)
@@ -132,13 +132,9 @@ dev.off()
 
 uniqueVoterIds <- levels(factor(selectionOfVotes$voter_id))
 
-membersVsPartiesOccurances <- table(selectionOfVotes$voter_id, selectionOfVotes$party)
-membersAndAllTheirParties <- apply(membersVsPartiesOccurances, 1, function(x) paste(colnames(membersVsPartiesOccurances)[x>0], collapse=","))
-membersAndTheirMostFrequentParty <- apply(membersVsPartiesOccurances, 1, function(x) paste(colnames(membersVsPartiesOccurances)[which.max(x)], collapse=","))
-
 distMat <- matrix(NA, length(uniqueVoterIds),  length(uniqueVoterIds))
-colnames(distMat) <- paste0(uniqueVoterIds, " (", membersAndAllTheirParties, ")")
-rownames(distMat) <- paste0(uniqueVoterIds, " (", membersAndAllTheirParties, ")")
+colnames(distMat) <- paste0(uniqueVoterIds, " (", voterIdsAndAllTheirParties, ")")
+rownames(distMat) <- paste0(uniqueVoterIds, " (", voterIdsAndAllTheirParties, ")")
 
 recalculateDistMat <- TRUE
 if (recalculateDistMat) {
@@ -179,12 +175,12 @@ if (recalculateDistMat) {
 rem <- which(rowMeans(is.na(distMat)) > 0.01)
 distMatR <- distMat[-rem, -rem]
 rownames(distMatR) <- uniqueVoterIds[-rem]
-colnames(distMatR) <- paste(uniqueVoterIds[-rem], membersAndTheirMostFrequentParty[-rem])
+colnames(distMatR) <- paste(uniqueVoterIds[-rem], voterIdsAndTheirMostFrequentParty[-rem])
 
 library(MASS)
 
 space <- isoMDS(as.dist(1.001-distMatR), k=2)
-df <- data.frame(space$points, parties=membersAndTheirMostFrequentParty[-rem], name=uniqueVoterIds[-rem])
+df <- data.frame(space$points, parties=voterIdsAndTheirMostFrequentParty[-rem], name=uniqueVoterIds[-rem])
 
 library(ggplot2)
 
@@ -224,7 +220,7 @@ png(countrySpecificPath("plotC_phylo.png"),
     pointsize=defaultPointSize,
 )
 plot(as.phylo(hc), type = "fan", cex = 0.4,
-     tip.color = colors[as.numeric(factor(membersAndTheirMostFrequentParty[-rem]))],
+     tip.color = colors[as.numeric(factor(voterIdsAndTheirMostFrequentParty[-rem]))],
      main=pattern)
 dev.off()
 

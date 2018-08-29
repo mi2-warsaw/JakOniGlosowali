@@ -8,26 +8,9 @@ library(parallel)
 
 numCores <- detectCores() # get the number of cores available
 
-partyColors <- c(PO = "orange3", PiS = "blue4", RP = "gold3", PSL="green4", SLD="red3", SP="blue1",
-          `niez.` = "grey", ID="gold4", TR="gold3", KPSP="blue2", BiG="orange2",
-          ZP="blue2", BC ="blue2" )
-scores <- c(`Nieobecny` = 0, `Przeciw` = -2, `Wstrzymał się` = -1, `Za` = 2)
-# Nieobecny = Absent, Przeciw = Against, Wstrzymał się = Abstained, Za = For
+source("parliament_voting_data.pl.R")
 
-
-load("all_votes.rda")
-
-# the data column "club" stands for which party/parties the member was a member of
-# translating here to "party" for clarity
-all_votes$party <- all_votes$club
-
-# pattern = pattern
-pattern <- "o ochronie zwierząt" # about animal protection
-pattern <- "szkolnict" # school
-pattern <- ""
-
-# debug
-# head(grep(unique(all_votes$topic_voting), pattern = "szkolnict", value = TRUE))
+scores <- c(`Absent` = 0, `Against` = -2, `Abstained` = -1, `For` = 2)
 
 votingTopicsThatMatchesPattern <- grep(unique(all_votes$topic_voting), pattern = pattern, value = TRUE)
 
@@ -89,22 +72,6 @@ plot(as.phylo(hc), type = "cladogram", cex = 0.4,
      main=pattern,
      rotate.tree=-85)
 
-
-# nazwy ustaw = names of laws
-# ustawy = bill
-# zmianie ustawy = change of the bill
-ustawy <- grep(unique(all_votes$topic_voting), pattern = "ustawy o", value=TRUE)
-ustawy2 <- sapply(ustawy, function(x) {
-  paste(strsplit(x, split= "ustawy o")[[1]][-1], collapse= "ustawy o")
-})
-# ustawy2 <- (gsub(ustawy, pattern="^.*ustawy o *", replacement = ""))
-ustawy2 <- (gsub(ustawy2, pattern="^ zmianie ustawy - *", replacement = ""))
-ustawy2 <- (gsub(ustawy2, pattern="^ zmianie ustawy o *", replacement = ""))
-ustawy2 <- (gsub(ustawy2, pattern="^ *", replacement = ""))
-ustawy3 <- (gsub(ustawy2, pattern=" *[-,\\(].*$", replacement = ""))
-
-
-ustawy3 <- names(which(table(ustawy3) > 5))
 
 
 

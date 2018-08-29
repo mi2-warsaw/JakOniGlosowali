@@ -15,6 +15,9 @@ all_votes$vote[all_votes$vote == "Za"] <- "For"
 # translating here to "party" for clarity
 colnames(all_votes)[colnames(all_votes)=="club"] <- "party"
 
+# translating column "surname_name" to "voter_id" for clarity
+colnames(all_votes)[colnames(all_votes)=="surname_name"] <- "voter_id"
+
 # debug
 # head(grep(unique(all_votes$topic_voting), pattern = "szkolnict", value = TRUE))
 

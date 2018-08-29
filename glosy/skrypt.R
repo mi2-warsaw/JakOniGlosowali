@@ -19,40 +19,35 @@ source("parliament_voting_data.pl.R")
 scores <- c(`Absent` = 0, `Against` = -2, `Abstained` = -1, `For` = 2)
 
 votingTopicsThatMatchesPattern <- grep(unique(all_votes$topic_voting), pattern = pattern, value = TRUE)
-
 selectionOfVotes <- all_votes %>%
   filter(topic_voting %in% votingTopicsThatMatchesPattern)
 
 partiesAndTheirVotes <- table(selectionOfVotes$party,selectionOfVotes$vote)[,c("For","Absent","Abstained","Against")]
 tt<-with(selectionOfVotes, partiesAndTheirVotes)
 partiesAndTheirVotes_sortedByMostFrequent <- tt[order(tt[,2], decreasing=T),]
+
 mosaicplot(partiesAndTheirVotes_sortedByMostFrequent, off = c(0,0), border="white", 
            color=c("green3", "grey", "red4", "red2"), las=2,
            main="")
 
-
-
-membersAndTheirParties <- table(selectionOfVotes$surname_name, selectionOfVotes$party)
-partiesIncludingHistory <- apply(membersAndTheirParties, 1, function(x) paste(colnames(membersAndTheirParties)[x>0], collapse=","))
-partiesOnlyLatest <- apply(membersAndTheirParties, 1, function(x) paste(colnames(membersAndTheirParties)[which.max(x)], collapse=","))
+membersVsPartiesOccurances <- table(selectionOfVotes$voter_id, selectionOfVotes$party)
+membersAndAllTheirParties <- apply(membersVsPartiesOccurances, 1, function(x) paste(colnames(membersVsPartiesOccurances)[x>0], collapse=","))
+membersAndTheirMostFrequentParty <- apply(membersVsPartiesOccurances, 1, function(x) paste(colnames(membersVsPartiesOccurances)[which.max(x)], collapse=","))
 
 selectionOfVotes$vote <- scores[as.character(selectionOfVotes$vote)]
 
-tVotes <- spread(selectionOfVotes[,c(1,3,4)], key = id_voting, value = vote)
-rownames(tVotes) <- paste(tVotes[,1], " - ", partiesIncludingHistory[as.character(tVotes[,1])], sep="")
-tVotes <- tVotes[,-1]
+tVotes_ <- spread(selectionOfVotes[,c(1,3,4)], key = id_voting, value = vote)
+rownames(tVotes_) <- paste(tVotes_[,1], " - ", membersAndAllTheirParties[as.character(tVotes_[,1])], sep="")
+tVotes <- tVotes_[,-1]
 
-# tylko Ci w sejmie na ponad 90% glosowan = only those in the Seym over 90% of the votes
-cVotes <- partiesOnlyLatest[rowMeans(is.na(tVotes)) < 0.1]
+# tylko Ci w sejmie na ponad 90% glosowan = Only those in the Diet on more than 90% of voting
+cVotes <- membersAndTheirMostFrequentParty[rowMeans(is.na(tVotes)) < 0.1]
 tVotes <- tVotes[rowMeans(is.na(tVotes)) < 0.1,]
-
-
 
 dVotes <- dist(tVotes)
 
 ag <- agnes(dVotes, method = "average")
 hc = as.hclust(ag)
-
 
 par(mar=c(1,1,2,1), xpd=NA)
 png("plot5_fan.png",
@@ -121,40 +116,36 @@ plot(as.phylo(hc), type = "cladogram", cex = 2.5,
      main=pattern)
 dev.off()
 
+# plots not mentioned in the original article
 
+uniqueVoterIds <- levels(factor(selectionOfVotes$voter_id))
 
+membersVsPartiesOccurances <- table(selectionOfVotes$voter_id, selectionOfVotes$party)
+membersAndAllTheirParties <- apply(membersVsPartiesOccurances, 1, function(x) paste(colnames(membersVsPartiesOccurances)[x>0], collapse=","))
+membersAndTheirMostFrequentParty <- apply(membersVsPartiesOccurances, 1, function(x) paste(colnames(membersVsPartiesOccurances)[which.max(x)], collapse=","))
 
-
-
-uniqueMemberNames <- levels(factor(selectionOfVotes$surname_name))
-
-membersAndTheirParties <- table(selectionOfVotes$surname_name, selectionOfVotes$party)
-partiesIncludingHistory <- apply(membersAndTheirParties, 1, function(x) paste(colnames(membersAndTheirParties)[x>0], collapse=","))
-
-partiesOnlyLatest <- apply(membersAndTheirParties, 1, function(x) paste(colnames(membersAndTheirParties)[which.max(x)], collapse=","))
-
-distMat <- matrix(NA, length(uniqueMemberNames),  length(uniqueMemberNames))
-colnames(distMat) <- paste0(uniqueMemberNames, " (", partiesIncludingHistory, ")")
-rownames(distMat) <- paste0(uniqueMemberNames, " (", partiesIncludingHistory, ")")
+distMat <- matrix(NA, length(uniqueVoterIds),  length(uniqueVoterIds))
+colnames(distMat) <- paste0(uniqueVoterIds, " (", membersAndAllTheirParties, ")")
+rownames(distMat) <- paste0(uniqueVoterIds, " (", membersAndAllTheirParties, ")")
 
 recalculateDistMat <- TRUE
 if (recalculateDistMat) {
   system.time({
-    
-    iMax <- (length(uniqueMemberNames)-1)
-    jMax <- length(uniqueMemberNames)
+
+    iMax <- (length(uniqueVoterIds)-1)
+    jMax <- length(uniqueVoterIds)
 
     message("Pre-calculating lists of personal votes")
     results_selectionOfVotes <- mclapply(1:jMax,
                                  FUN=function(i) {
                                    selectionOfVotesI <- selectionOfVotes %>%
-                                     filter(surname_name %in% uniqueMemberNames[i])
+                                     filter(voter_id %in% uniqueVoterIds[i])
                                  },
                                  mc.cores = numCores)
     
     message("Summarizing intersections between member votes")
     for (i in 1:iMax) {
-      cat("\n",i," ", uniqueMemberNames[i]," ")
+      cat("\n",i," ", uniqueVoterIds[i]," ")
       for (j in i:jMax) {
         selectionOfVotesI <- results_selectionOfVotes[[i]]
         selectionOfVotesJ <- results_selectionOfVotes[[j]]
@@ -175,13 +166,13 @@ if (recalculateDistMat) {
 
 rem <- which(rowMeans(is.na(distMat)) > 0.01)
 distMatR <- distMat[-rem, -rem]
-rownames(distMatR) <- uniqueMemberNames[-rem]
-colnames(distMatR) <- paste(uniqueMemberNames[-rem], partiesOnlyLatest[-rem])
+rownames(distMatR) <- uniqueVoterIds[-rem]
+colnames(distMatR) <- paste(uniqueVoterIds[-rem], membersAndTheirMostFrequentParty[-rem])
 
 library(MASS)
 
 space <- isoMDS(as.dist(1.001-distMatR), k=2)
-df <- data.frame(space$points, parties=partiesOnlyLatest[-rem], name=uniqueMemberNames[-rem])
+df <- data.frame(space$points, parties=membersAndTheirMostFrequentParty[-rem], name=uniqueVoterIds[-rem])
 
 library(ggplot2)
 
@@ -208,7 +199,6 @@ hc = as.hclust(ag)
 par(mar=c(0,0,2,0))
 
 plot(as.phylo(hc), type = "fan", cex = 0.4,
-     tip.color = colors[as.numeric(factor(partiesOnlyLatest[-rem]))],
+     tip.color = colors[as.numeric(factor(membersAndTheirMostFrequentParty[-rem]))],
      main=pattern)
-
 

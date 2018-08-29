@@ -2,7 +2,7 @@ library(dplyr)
 library(tidyr)
 library(networkD3)
 
-load("/Users/pbiecek/GitHub/JakOniGlosowali/all_votes.rda")
+load("../all_votes.rda")
 
 #wybieramy kluczowe głosowania
 kluczowe <- c("1","2474","3773","3980","4865","6029")

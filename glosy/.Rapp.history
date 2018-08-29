@@ -1,4 +1,0 @@
-load("/Users/pbiecek/GitHub/JakOniGlosowali/glosy/all_votes.rda")
-ls()
-str(all_votes)
-head(all_votes)

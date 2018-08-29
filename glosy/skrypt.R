@@ -1,174 +1,238 @@
+if (!require(cluster)) install.packages("cluster", dependencies = TRUE);
+if (!require(ggdendro)) install.packages("ggdendro", dependencies = TRUE);
+if (!require(ape)) install.packages("ape", dependencies = TRUE);
+if (!require(RColorBrewer)) install.packages("RColorBrewer", dependencies = TRUE);
+if (!require(dplyr)) install.packages("dplyr", dependencies = TRUE);
+if (!require(tidyr)) install.packages("tidyr", dependencies = TRUE);
+if (!require(parallel)) install.packages("parallel", dependencies = TRUE);
+if (!require(dendextend)) install.packages("dendextend", dependencies = TRUE);
+
 library(cluster)
 library(ggdendro)
 library(ape)
 library(RColorBrewer)
 library(dplyr)
 library(tidyr)
+library(parallel)
+library(dendextend)
 
-kol <- brewer.pal(9,"Set1")
-kol2 <- c(PO = "orange3", PiS = "blue4", RP = "gold3", PSL="green4", SLD="red3", SP="blue1",
-          `niez.` = "grey", ID="gold4", TR="gold3", KPSP="blue2", BiG="orange2",
-          ZP="blue2", BC ="blue2" )
-scores <- c(`Nieobecny` = 0, `Przeciw` = -2, `Wstrzymał się` = -1, `Za` = 2)
+# country to work with
+country <- "pl"
 
+countrySpecificPath <- function(path) {
+  paste("./", country, "/", path, sep="")
+}
 
-load("/Users/pbiecek/GitHub/JakOniGlosowali/all_votes.rda")
+# settings for plot exports
+defaultWidth <- 2000
+defaultHeight <- 2000
+defaultPointSize <- 40
+pdf.options(encoding='ISOLatin2.enc')
 
+numCores <- detectCores() # get the number of cores available
 
-wzor <- "o ochronie zwierząt"
-wzor <- "szkolnict"
-wzor <- ""
+source(countrySpecificPath("parliament_voting_data.R"))
 
-head(grep(unique(all_votes$topic_voting), pattern = "szkolnict", value = TRUE))
+scores <- c(`Absent` = 0, `Against` = -2, `Abstained` = -1, `For` = 2)
 
-tytulyGlos <- grep(unique(all_votes$topic_voting), pattern = wzor, value = TRUE)
+votingTopicsThatMatchesPattern <- grep(unique(all_votes$topic_voting), pattern = pattern, value = TRUE)
+selectionOfVotes <- all_votes %>%
+  filter(topic_voting %in% votingTopicsThatMatchesPattern)
 
-selVotes <- all_votes %>%
-  filter(topic_voting %in% tytulyGlos)
+partiesAndTheirVotes <- table(selectionOfVotes$party,selectionOfVotes$vote)[,c("For","Absent","Abstained","Against")]
+tt<-with(selectionOfVotes, partiesAndTheirVotes)
+partiesAndTheirVotes_sortedByMostFrequent <- tt[order(tt[,2], decreasing=T),]
 
-tabi2 <- table(selVotes$club,selVotes$vote)[,c(4,1,3,2)]
-mosaicplot(tabi2, off = c(0,0), border="white", 
+png(countrySpecificPath("plotA_mosaicplot.png"),
+    width=defaultWidth,
+    height=defaultHeight,
+    pointsize=defaultPointSize,
+)
+mosaicplot(partiesAndTheirVotes_sortedByMostFrequent, off = c(0,0), border="white", 
            color=c("green3", "grey", "red4", "red2"), las=2,
            main="")
+dev.off()
 
+voterIdsVsPartiesOccurances <- table(selectionOfVotes$voter_id, selectionOfVotes$party)
+voterIdsAndAllTheirParties <- apply(voterIdsVsPartiesOccurances, 1, function(x) paste(colnames(voterIdsVsPartiesOccurances)[x>0], collapse=","))
+voterIdsAndTheirMostFrequentParty <- apply(voterIdsVsPartiesOccurances, 1, function(x) paste(colnames(voterIdsVsPartiesOccurances)[which.max(x)], collapse=","))
 
+voterIdsVsVoterNameOccurances <- table(selectionOfVotes$voter_id, selectionOfVotes$voter_name)
+voterIdsAndTheirVoterName <- apply(voterIdsVsVoterNameOccurances, 1, function(x) paste(colnames(voterIdsVsVoterNameOccurances)[x>0], collapse=","))
 
-tabi <- table(selVotes$surname_name, selVotes$club)
-clubs <- apply(tabi, 1, function(x) paste(colnames(tabi)[x>0], collapse=","))
-clubs2 <- apply(tabi, 1, function(x) paste(colnames(tabi)[which.max(x)], collapse=","))
+# replace the vote column with their numeric scores
+selectionOfVotes$vote <- scores[as.character(selectionOfVotes$vote)]
 
-selVotes$vote <- scores[as.character(selVotes$vote)]
+votersAndTheirVotes_ <- spread(selectionOfVotes[,c("voter_id","vote","id_voting")], key = id_voting, value = vote)
+voterIds <- votersAndTheirVotes_[,1]
+rownames(votersAndTheirVotes_) <- voterIds
 
-tVotes <- spread(selVotes[,c(1,3,4)], key = id_voting, value = vote)
-rownames(tVotes) <- paste(tVotes[,1], " - ", clubs[as.character(tVotes[,1])], sep="")
-tVotes <- tVotes[,-1]
+votersAndTheirVotes <- votersAndTheirVotes_[,-1] # removes the voter_id column, leaving only the votes (columns) of each voter (rows)
 
-# tylko Ci w sejmie na ponad 90% glosowan
-cVotes <- clubs2[rowMeans(is.na(tVotes)) < 0.1]
-tVotes <- tVotes[rowMeans(is.na(tVotes)) < 0.1,]
-
-
-
-dVotes <- dist(tVotes)
+# only include parliament members that have voted on at least 90% of the votings
+voteFilter <- rowMeans(is.na(votersAndTheirVotes)) < 0.1
+partyRepresentedByEachVote <- voterIdsAndTheirMostFrequentParty[voteFilter]
+consistentVotersAndTheirVotes <- votersAndTheirVotes[voteFilter,]
+consistentVotersAndTheirVoterName <- voterIdsAndTheirVoterName[voteFilter]
+dVotes <- dist(consistentVotersAndTheirVotes)
 
 ag <- agnes(dVotes, method = "average")
 hc = as.hclust(ag)
+labels(hc) <- paste(consistentVotersAndTheirVoterName[order.hclust(hc)], " - ", voterIdsAndAllTheirParties[voteFilter][order.hclust(hc)], sep="")
+
+par(xpd=NA)
+png(countrySpecificPath("plot5_fan.png"),
+    width=defaultWidth,
+    height=defaultHeight,
+    pointsize=defaultPointSize,
+)
+plot(as.phylo(hc), type = "fan", cex = 0.4,
+     tip.color = partyColors[partyRepresentedByEachVote],
+     edge.width = 2,
+     no.margin = TRUE,
+     main=pattern,
+     rotate.tree=-85)
+dev.off()
 
 par(mar=c(1,1,2,1), xpd=NA)
-
-plot(as.phylo(hc), type = "fan", cex = 0.4,
-     tip.color = kol2[cVotes],
-     main=wzor,
-     rotate.tree=-85)
-
+png(countrySpecificPath("plot4_unrooted.png"),
+    width=defaultWidth,
+    height=defaultHeight,
+    pointsize=defaultPointSize,
+)
 plot(as.phylo(hc), type = "unrooted", cex = 0.4,
-     tip.color = kol2[cVotes],
-     main=wzor,
+     tip.color = partyColors[partyRepresentedByEachVote],
+     no.margin = TRUE,
+     main=pattern,
      rotate.tree=-85)
+dev.off()
 
+par(mar=c(1,1,2,1), xpd=NA)
+png(countrySpecificPath("plot5alt_radial.png"),
+    width=defaultWidth,
+    height=defaultHeight,
+    pointsize=defaultPointSize,
+)
 plot(as.phylo(hc), type = "radial", cex = 0.4,
-     tip.color = kol2[cVotes],
-     main=wzor,
+     tip.color = partyColors[partyRepresentedByEachVote],
+     edge.width = 2,
+     no.margin = TRUE,
+     main=pattern,
      rotate.tree=-85)
+dev.off()
 
-plot(as.phylo(hc), type = "phylogram", cex = 0.4,
-     tip.color = kol2[cVotes],
-     main=wzor,
-     rotate.tree=-85)
+par(mar=c(0,0,0,0), xpd=NA)
+png(countrySpecificPath("plot3_phylogram.png"),
+    width=as.integer(defaultWidth*2.0),
+    height=as.integer(defaultHeight*2.0),
+    pointsize=15,
+)
+plot(as.phylo(hc), type = "phylogram", cex = 2.5,
+     tip.color = partyColors[partyRepresentedByEachVote],
+     edge.width = 2,
+     no.margin = TRUE,
+     main=pattern)
+dev.off()
 
-plot(as.phylo(hc), type = "cladogram", cex = 0.4,
-     tip.color = kol2[cVotes],
-     main=wzor,
-     rotate.tree=-85)
+par(mar=c(0,0,0,0), xpd=NA)
+png(countrySpecificPath("plot3alt_cladogram.png"),
+    width=as.integer(defaultWidth*2.0),
+    height=as.integer(defaultHeight*2.0),
+    pointsize=15,
+)
+plot(as.phylo(hc), type = "cladogram", cex = 2.5,
+     tip.color = partyColors[partyRepresentedByEachVote],
+     edge.width = 2,
+     no.margin = TRUE,
+     main=pattern)
+dev.off()
 
+# plots not mentioned in the original article
 
-# nazwy ustaw
-ustawy <- grep(unique(all_votes$topic_voting), pattern = "ustawy o", value=TRUE)
-ustawy2 <- sapply(ustawy, function(x) {
-  paste(strsplit(x, split= "ustawy o")[[1]][-1], collapse= "ustawy o")
-})
-# ustawy2 <- (gsub(ustawy, pattern="^.*ustawy o *", replacement = ""))
-ustawy2 <- (gsub(ustawy2, pattern="^ zmianie ustawy - *", replacement = ""))
-ustawy2 <- (gsub(ustawy2, pattern="^ zmianie ustawy o *", replacement = ""))
-ustawy2 <- (gsub(ustawy2, pattern="^ *", replacement = ""))
-ustawy3 <- (gsub(ustawy2, pattern=" *[-,\\(].*$", replacement = ""))
+uniqueVoterIds <- levels(factor(selectionOfVotes$voter_id))
 
+distMat <- matrix(NA, length(uniqueVoterIds),  length(uniqueVoterIds))
+colnames(distMat) <- uniqueVoterIds
+rownames(distMat) <- uniqueVoterIds
 
-ustawy3 <- names(which(table(ustawy3) > 5))
+recalculateDistMat <- TRUE
+if (recalculateDistMat) {
+  system.time({
 
+    iMax <- (length(uniqueVoterIds)-1)
+    jMax <- length(uniqueVoterIds)
 
+    message("Pre-calculating lists of personal votes")
+    results_selectionOfVotes <- mclapply(1:jMax,
+                                 FUN=function(i) {
+                                   selectionOfVotesI <- selectionOfVotes %>%
+                                     filter(voter_id %in% uniqueVoterIds[i])
+                                 },
+                                 mc.cores = numCores)
+    
+    message("Summarizing intersections between member votes")
+    for (i in 1:iMax) {
+      cat("\n",i," ", uniqueVoterIds[i]," ")
+      for (j in i:jMax) {
+        selectionOfVotesI <- results_selectionOfVotes[[i]]
+        selectionOfVotesJ <- results_selectionOfVotes[[j]]
 
-
-
-
-
-
-selPos <- levels(factor(selVotes$surname_name))
-
-tabi <- table(selVotes$surname_name, selVotes$club)
-clubs <- apply(tabi, 1, function(x) paste(colnames(tabi)[x>0], collapse=","))
-
-clubs2 <- apply(tabi, 1, function(x) paste(colnames(tabi)[which.max(x)], collapse=","))
-
-distMat <- matrix(NA, length(selPos),  length(selPos))
-colnames(distMat) <- paste0(selPos, " (", clubs, ")")
-rownames(distMat) <- paste0(selPos, " (", clubs, ")")
-
-system.time({
-  for (i in 1:(length(selPos)-1)) {
-    cat("\n",i," ", selPos[i]," ")
-    for (j in i:length(selPos)) {
-      selVotesI <- selVotes %>%
-        filter(surname_name %in% selPos[i])
-      selVotesJ <- selVotes %>%
-        filter(surname_name %in% selPos[j])
-      
-      selIJ <- merge(selVotesI[,c(1,2,3,4)], selVotesJ[,c(1,2,3,4)], by="id_voting")
-      
-      distMat[i,j] = mean(selIJ$vote.x == selIJ$vote.y)
-      distMat[j,i] = mean(selIJ$vote.x == selIJ$vote.y)
-      cat(".")
+        selIJ <- merge(selectionOfVotesI[,c(1,2,3,4)], selectionOfVotesJ[,c(1,2,3,4)], by="id_voting")
+        
+        distMat[i,j] = mean(selIJ$vote.x == selIJ$vote.y)
+        distMat[j,i] = mean(selIJ$vote.x == selIJ$vote.y)
+        cat(".")
+      }
     }
-  }
-  
-})
+    
+  })
+  save(distMat, file = countrySpecificPath("distMat.rda"))
+} else {
+  load(file = countrySpecificPath("distMat.rda"))
+}
 
 rem <- which(rowMeans(is.na(distMat)) > 0.01)
 distMatR <- distMat[-rem, -rem]
-rownames(distMatR) <- selPos[-rem]
-colnames(distMatR) <- paste(selPos[-rem], clubs2[-rem])
+rownames(distMatR) <- uniqueVoterIds[-rem]
+colnames(distMatR) <- uniqueVoterIds[-rem]
 
+if (!require(MASS)) install.packages("MASS", dependencies = TRUE);
 library(MASS)
 
 space <- isoMDS(as.dist(1.001-distMatR), k=2)
-df <- data.frame(space$points, clubs=clubs2[-rem], name=selPos[-rem])
+df <- data.frame(space$points, parties=voterIdsAndTheirMostFrequentParty[-rem], voterIds=uniqueVoterIds[-rem], voterNames=voterIdsAndTheirVoterName[-rem])
 
+if (!require(ggplot2)) install.packages("ggplot2", dependencies = TRUE);
 library(ggplot2)
 
-ggplot(df, aes(X1, X2, color=clubs, label=name)) +
+# a plot not mentioned in the original article
+png(countrySpecificPath("plotB_aes.png"),
+    width=as.integer(defaultWidth/3),
+    height=as.integer(defaultHeight/3),
+    pointsize=defaultPointSize,
+)
+ggplot(df, aes(X1, X2, color=parties, label=voterNames)) +
   geom_text(size=4) +
   theme_bw() + scale_shape_manual(values=LETTERS)
+dev.off()
 
+ag2 <- agnes(as.dist(1.001-t(distMatR)), method = "average")
 
-distMatR["Napieralski Grzegorz",]
+colors <- brewer.pal(9,"Set1")
 
-
-library(cluster)
-
-ag <- agnes(as.dist(1.001-t(distMatR)), method = "average")
-
-library(ggdendro)
-library(ape)
-library(RColorBrewer)
-
-kol <- brewer.pal(9,"Set1")
-
-hc = as.hclust(ag)
+hc2 = as.hclust(ag2)
+labels(hc2) <- paste(df$voterNames[order.hclust(hc2)], " - ", df$parties[voteFilter][order.hclust(hc2)], sep="")
 
 par(mar=c(0,0,2,0))
 
-plot(as.phylo(hc), type = "fan", cex = 0.4,
-     tip.color = kol[as.numeric(factor(clubs2[-rem]))],
-     main=wzor)
-
+# another plot not mentioned in the original article
+png(countrySpecificPath("plotC_phylo.png"),
+    width=defaultWidth,
+    height=defaultHeight,
+    pointsize=defaultPointSize,
+)
+plot(as.phylo(hc2), type = "fan", cex = 0.4,
+     tip.color = colors[as.numeric(factor(voterIdsAndTheirMostFrequentParty[-rem]))],
+     main=pattern)
+dev.off()
 

@@ -3,7 +3,7 @@ partyColors <- c(PO = "orange3", PiS = "blue4", RP = "gold3", PSL="green4", SLD=
                  ZP="blue2", BC ="blue2" )
 # Nieobecny = Absent, Przeciw = Against, Wstrzymał się = Abstained, Za = For
 
-load("all_votes.pl.rda")
+load(countrySpecificPath("all_votes.rda"))
 
 # translate the vote column
 all_votes$vote[all_votes$vote == "Nieobecny"] <- "Absent"

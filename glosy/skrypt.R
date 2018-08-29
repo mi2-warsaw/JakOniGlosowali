@@ -6,6 +6,13 @@ library(dplyr)
 library(tidyr)
 library(parallel)
 
+# country to work with
+country <- "pl"
+
+countrySpecificPath <- function(path) {
+  paste("./", country, "/", path, sep="")
+}
+
 # settings for plot exports
 defaultWidth <- 2000
 defaultHeight <- 2000
@@ -13,7 +20,7 @@ defaultPointSize <- 40
 
 numCores <- detectCores() # get the number of cores available
 
-source("parliament_voting_data.pl.R")
+source(countrySpecificPath("parliament_voting_data.R"))
 
 scores <- c(`Absent` = 0, `Against` = -2, `Abstained` = -1, `For` = 2)
 
@@ -25,7 +32,7 @@ partiesAndTheirVotes <- table(selectionOfVotes$party,selectionOfVotes$vote)[,c("
 tt<-with(selectionOfVotes, partiesAndTheirVotes)
 partiesAndTheirVotes_sortedByMostFrequent <- tt[order(tt[,2], decreasing=T),]
 
-png("plotA_mosaicplot.png",
+png(countrySpecificPath("plotA_mosaicplot.png"),
     width=defaultWidth,
     height=defaultHeight,
     pointsize=defaultPointSize,
@@ -55,7 +62,7 @@ ag <- agnes(dVotes, method = "average")
 hc = as.hclust(ag)
 
 par(mar=c(1,1,2,1), xpd=NA)
-png("plot5_fan.png",
+png(countrySpecificPath("plot5_fan.png"),
     width=defaultWidth,
     height=defaultHeight,
     pointsize=defaultPointSize,
@@ -69,7 +76,7 @@ plot(as.phylo(hc), type = "fan", cex = 0.4,
 dev.off()
 
 par(mar=c(1,1,2,1), xpd=NA)
-png("plot4_unrooted.png",
+png(countrySpecificPath("plot4_unrooted.png"),
     width=defaultWidth,
     height=defaultHeight,
     pointsize=defaultPointSize,
@@ -82,7 +89,7 @@ plot(as.phylo(hc), type = "unrooted", cex = 0.4,
 dev.off()
 
 par(mar=c(1,1,2,1), xpd=NA)
-png("plot5alt_radial.png",
+png(countrySpecificPath("plot5alt_radial.png"),
     width=defaultWidth,
     height=defaultHeight,
     pointsize=defaultPointSize,
@@ -96,7 +103,7 @@ plot(as.phylo(hc), type = "radial", cex = 0.4,
 dev.off()
 
 par(mar=c(0,0,0,0), xpd=NA)
-png("plot3_phylogram.png",
+png(countrySpecificPath("plot3_phylogram.png"),
     width=as.integer(defaultWidth*2.0),
     height=as.integer(defaultHeight*2.0),
     pointsize=15,
@@ -109,7 +116,7 @@ plot(as.phylo(hc), type = "phylogram", cex = 2.5,
 dev.off()
 
 par(mar=c(0,0,0,0), xpd=NA)
-png("plot3alt_cladogram.png",
+png(countrySpecificPath("plot3alt_cladogram.png"),
     width=as.integer(defaultWidth*2.0),
     height=as.integer(defaultHeight*2.0),
     pointsize=15,
@@ -164,9 +171,9 @@ if (recalculateDistMat) {
     }
     
   })
-  save(distMat, file = "distMat.rda")
+  save(distMat, file = countrySpecificPath("distMat.rda"))
 } else {
-  load(file = "distMat.rda")
+  load(file = countrySpecificPath("distMat.rda"))
 }
 
 rem <- which(rowMeans(is.na(distMat)) > 0.01)
@@ -182,7 +189,7 @@ df <- data.frame(space$points, parties=membersAndTheirMostFrequentParty[-rem], n
 library(ggplot2)
 
 # a plot not mentioned in the original article
-png("plotB_aes.png",
+png(countrySpecificPath("plotB_aes.png"),
     width=as.integer(defaultWidth/3),
     height=as.integer(defaultHeight/3),
     pointsize=defaultPointSize,
@@ -211,7 +218,7 @@ hc = as.hclust(ag)
 par(mar=c(0,0,2,0))
 
 # another plot not mentioned in the original article
-png("plotC_phylo.png",
+png(countrySpecificPath("plotC_phylo.png"),
     width=defaultWidth,
     height=defaultHeight,
     pointsize=defaultPointSize,

@@ -6,6 +6,12 @@ library(dplyr)
 library(tidyr)
 library(parallel)
 
+# settings for plot exports
+defaultWidth <- 2000
+defaultHeight <- 2000
+defaultPointSize <- 40
+dev.off() # reset output device
+
 numCores <- detectCores() # get the number of cores available
 
 source("parliament_voting_data.pl.R")
@@ -45,34 +51,73 @@ dVotes <- dist(tVotes)
 ag <- agnes(dVotes, method = "average")
 hc = as.hclust(ag)
 
-par(mar=c(1,1,2,1), xpd=NA)
 
+par(mar=c(1,1,2,1), xpd=NA)
+png("plot5_fan.png",
+    width=defaultWidth,
+    height=defaultHeight,
+    pointsize=defaultPointSize,
+)
 plot(as.phylo(hc), type = "fan", cex = 0.4,
      tip.color = partyColors[cVotes],
+     edge.width = 2,
+     no.margin = TRUE,
      main=pattern,
      rotate.tree=-85)
+dev.off()
 
+par(mar=c(1,1,2,1), xpd=NA)
+png("plot4_unrooted.png",
+    width=defaultWidth,
+    height=defaultHeight,
+    pointsize=defaultPointSize,
+)
 plot(as.phylo(hc), type = "unrooted", cex = 0.4,
      tip.color = partyColors[cVotes],
+     no.margin = TRUE,
      main=pattern,
      rotate.tree=-85)
+dev.off()
 
+par(mar=c(1,1,2,1), xpd=NA)
+png("plot5alt_radial.png",
+    width=defaultWidth,
+    height=defaultHeight,
+    pointsize=defaultPointSize,
+)
 plot(as.phylo(hc), type = "radial", cex = 0.4,
      tip.color = partyColors[cVotes],
+     edge.width = 2,
+     no.margin = TRUE,
      main=pattern,
      rotate.tree=-85)
+dev.off()
 
-plot(as.phylo(hc), type = "phylogram", cex = 0.4,
+par(mar=c(0,0,0,0), xpd=NA)
+png("plot3_phylogram.png",
+    width=as.integer(defaultWidth*2.0),
+    height=as.integer(defaultHeight*2.0),
+    pointsize=15,
+)
+plot(as.phylo(hc), type = "phylogram", cex = 2.5,
      tip.color = partyColors[cVotes],
-     main=pattern,
-     rotate.tree=-85)
+     edge.width = 2,
+     no.margin = TRUE,
+     main=pattern)
+dev.off()
 
-plot(as.phylo(hc), type = "cladogram", cex = 0.4,
+par(mar=c(0,0,0,0), xpd=NA)
+png("plot3alt_cladogram.png",
+    width=as.integer(defaultWidth*2.0),
+    height=as.integer(defaultHeight*2.0),
+    pointsize=15,
+)
+plot(as.phylo(hc), type = "cladogram", cex = 2.5,
      tip.color = partyColors[cVotes],
-     main=pattern,
-     rotate.tree=-85)
-
-
+     edge.width = 2,
+     no.margin = TRUE,
+     main=pattern)
+dev.off()
 
 
 
